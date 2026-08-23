@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Counter — Count Words, Characters, Sentences Instantly | ToolForge</title>
+<meta name="description" content="Free word counter: count words, characters (with and without spaces), sentences and paragraphs as you type. No signup, no upload — runs 100% in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/word-counter/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Word Counter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:880px;margin:0 auto;padding:24px 20px 64px}
+  h1{font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  textarea{width:100%;min-height:200px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:15px/1.6 system-ui,sans-serif;resize:vertical}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:10px}
+  button.ghost{background:#232a38;color:var(--text)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:14px}
+  .stat{background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:1.5rem;color:var(--ok)}
+  .stat span{color:var(--mut);font-size:.82rem}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <p><span class="badge">Live counting</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Word Counter</h1>
+  <p class="sub">Type or paste text below — words, characters, sentences and paragraphs are counted instantly as you write.</p>
+
+  <div class="card">
+    <textarea id="in" placeholder="Start typing or paste your text here…"></textarea>
+    <button class="ghost" onclick="document.getElementById('in').value='';count();">Clear</button>
+    <button class="ghost" onclick="copyStats()">Copy stats</button>
+    <div class="stats">
+      <div class="stat"><b id="words">0</b><span>Words</span></div>
+      <div class="stat"><b id="chars">0</b><span>Characters</span></div>
+      <div class="stat"><b id="charsns">0</b><span>Chars (no spaces)</span></div>
+      <div class="stat"><b id="sentences">0</b><span>Sentences</span></div>
+      <div class="stat"><b id="paragraphs">0</b><span>Paragraphs</span></div>
+      <div class="stat"><b id="reading">0s</b><span>Reading time</span></div>
+    </div>
+  </div>
+
+  <h2>Common questions about word counts</h2>
+  <ul>
+    <li><strong>How long is 500 words?</strong> About one page single-spaced (roughly 250–300 words per page). An average speaker reads ~150 words per minute aloud.</li>
+    <li><strong>Typical limits:</strong> tweets/posts 280 chars · meta descriptions ~155 chars · essays often 500–1,000 words · blog posts 800–2,500 words.</li>
+    <li><strong>Do spaces count as characters?</strong> Usually yes in platform limits — that's why both counts are shown above.</li>
+  </ul>
+
+  <h2>Why use this counter?</h2>
+  <ul>
+    <li><strong>Counts as you type</strong> — no button needed, no waiting.</li>
+    <li><strong>Your text never leaves your device.</strong> This page is plain JavaScript running locally; nothing is uploaded anywhere.</li>
+    <li><strong>No limits, no account, no watermarks</strong> — count a sentence or a whole book chapter.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools. More converters coming.</p>
+</main>
+<script>
+function calc(t){
+  const trimmed=t.trim();
+  const words=trimmed?trimmed.split(/\s+/).length:0;
+  const chars=t.length;
+  const charsns=t.replace(/\s/g,'').length;
+  const sentences=trimmed?(trimmed.match(/[.!?]+(?:\s|$)/g)||[]).length+(trimmed&&!/[.!?]\s*$/.test(trimmed)?1:0):0;
+  const paragraphs=trimmed?trimmed.split(/\n\s*\n/).filter(p=>p.trim()).length:0;
+  const reading=Math.ceil(words/200);
+  return {words,chars,charsns,sentences,paragraphs,reading};
+}
+function count(){
+  const r=calc(document.getElementById('in').value);
+  document.getElementById('words').textContent=r.words;
+  document.getElementById('chars').textContent=r.chars;
+  document.getElementById('charsns').textContent=r.charsns;
+  document.getElementById('sentences').textContent=r.sentences;
+  document.getElementById('paragraphs').textContent=r.paragraphs;
+  document.getElementById('reading').textContent=(r.words?'~'+r.reading+' min':'0');
+}
+async function copyStats(){
+  const r=calc(document.getElementById('in').value);
+  const s='Words: '+r.words+' | Characters: '+r.chars+' | Chars (no spaces): '+r.charsns+' | Sentences: '+r.sentences+' | Paragraphs: '+r.paragraphs;
+  try{await navigator.clipboard.writeText(s);}catch(e){}
+}
+document.getElementById('in').addEventListener('input',count);
+</script>
+</body>
+</html>

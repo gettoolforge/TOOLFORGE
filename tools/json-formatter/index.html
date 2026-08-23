@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON Formatter & Validator — Beautify, Minify, Check | ToolForge</title>
+<meta name="description" content="Format (beautify), minify and validate JSON instantly in your browser. Clear error messages show exactly what's broken. No upload, no signup — 100% private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/json-formatter/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"JSON Formatter & Validator","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:960px;margin:0 auto;padding:24px 20px 64px}
+  h1{font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  textarea{width:100%;min-height:220px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin:10px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  #status{margin-left:8px;font-weight:600}
+  .ok{color:var(--ok)}.err{color:var(--err)}
+  pre{background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;overflow:auto;display:none;max-height:420px}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <p><span class="badge">Instant validation</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>JSON Formatter & Validator</h1>
+  <p class="sub">Paste JSON below — validate it, beautify it with clean indentation, or minify it for production. Everything runs locally in your browser.</p>
+
+  <div class="card">
+    <label for="in"><strong>Your JSON:</strong></label><br>
+    <textarea id="in" placeholder='{"paste":"your json here"}'></textarea>
+    <button onclick="run('pretty')">Beautify</button>
+    <button onclick="run('min')">Minify</button>
+    <button onclick="run('check')">Validate only</button>
+    <button class="ghost" onclick="copyOut()">Copy result</button>
+    <button class="ghost" onclick="clearAll()">Clear</button>
+    <span id="status"></span>
+    <pre id="out"></pre>
+  </div>
+
+  <h2>Common JSON errors this validator catches</h2>
+  <ul>
+    <li><strong>Trailing commas:</strong> <code>[1, 2, 3,]</code> — invalid in strict JSON, even though JavaScript allows them.</li>
+    <li><strong>Single quotes:</strong> keys and strings must use double quotes: <code>{'a': 1}</code> is invalid.</li>
+    <li><strong>Unquoted keys:</strong> <code>{a: 1}</code> looks fine in JS but is not valid JSON.</li>
+    <li><strong>Comments:</strong> JSON has no comments — <code>// like this</code> breaks parsers.</li>
+    <li><strong>The error message tells you the position</strong> of the first problem, so you can fix it fast.</li>
+  </ul>
+
+  <h2>Why format JSON here?</h2>
+  <ul>
+    <li><strong>Nothing leaves your machine.</strong> Some online formatters send your data to their servers — dangerous with API responses containing tokens or user data. This one can't leak what it never receives.</li>
+    <li><strong>No size anxiety.</strong> Large API payloads are fine; your browser does the work.</li>
+    <li><strong>One-click pipeline:</strong> paste → beautify → copy into your code.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools. More converters coming.</p>
+</main>
+<script>
+let lastOut='';
+function run(mode){
+  const src=document.getElementById('in').value;
+  const st=document.getElementById('status');
+  const out=document.getElementById('out');
+  if(!src.trim()){st.className='err';st.textContent='⚠ Nothing to process';return;}
+  try{
+    const obj=JSON.parse(src);
+    lastOut=(mode==='min')?JSON.stringify(obj):JSON.stringify(obj,null,2);
+    out.textContent=lastOut;
+    out.style.display=(mode==='check')?'none':'block';
+    st.className='ok';
+    st.textContent='✓ Valid JSON'+(mode==='min'?' — minified':'')+(mode==='pretty'?' — formatted':(mode==='check'?' — no problems found':''));
+  }catch(e){
+    st.className='err';
+    st.textContent='✗ Invalid JSON: '+e.message;
+    out.style.display='none';lastOut='';
+  }
+}
+async function copyOut(){
+  if(!lastOut)return;
+  try{await navigator.clipboard.writeText(lastOut);}catch(e){}
+}
+function clearAll(){
+  document.getElementById('in').value='';document.getElementById('out').style.display='none';lastOut='';
+  document.getElementById('status').textContent='';
+}
+</script>
+</body>
+</html>
