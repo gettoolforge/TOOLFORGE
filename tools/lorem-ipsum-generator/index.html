@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lorem Ipsum Generator — Placeholder Text (Paragraphs, Words) | ToolForge</title>
+<meta name="description" content="Generate lorem ipsum placeholder text instantly: paragraphs, sentences or words. Free, private, no signup — runs entirely in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/lorem-ipsum-generator/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Lorem Ipsum Generator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input,select,button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin:10px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  input[type=number]{width:90px}
+  textarea{width:100%;min-height:260px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:15px/1.6 Georgia,serif;resize:vertical;margin-top:12px}
+  #msg{margin-left:8px;color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Lorem Ipsum Generator</span></header>
+  <p><span class="badge">Instant</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Lorem Ipsum Generator</h1>
+  <p class="sub">Classic filler text for mockups, wireframes and layouts — paragraphs, sentences or words, your count.</p>
+
+  <div class="card">
+    <label>Generate
+      <input type="number" id="count" value="3" min="1" max="100">
+      <select id="unit"><option value="p">paragraphs</option><option value="s">sentences</option><option value="w">words</option></select>
+    </label>
+    <label style="margin-left:16px"><input type="checkbox" id="classic" style="width:auto" checked> Start with “Lorem ipsum dolor sit amet”</label>
+    <br>
+    <button onclick="gen()">Generate</button>
+    <button class="ghost" onclick="copyOut()">Copy text</button>
+    <span id="msg"></span>
+    <textarea id="out" readonly></textarea>
+  </div>
+
+  <h2>What is lorem ipsum?</h2>
+  <ul>
+    <li>Scrambled pseudo-Latin used as placeholder since the 1500s (popularized by Letraset sheets in the 60s, then desktop publishing). It looks like real text — even word lengths and punctuation rhythm — so layouts can be judged without distracting content.</li>
+    <li>It is <strong>not meaningful Latin</strong> and it is not copyrighted; use it freely.</li>
+    <li>This generator builds text from the classic corpus with varied sentence lengths, so repeated blocks don't look copy-pasted.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const CORPUS=('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum perspiciatis unde omnis iste natus error voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis quasi architecto beatae vitae dicta explicabo nemo ipsam quia voluptas aspernatur aut odit fugit consequuntur magni dolores eos ratione sequi nesciunt neque porro quisquam est dolorem adipisci numquam eius modi tempora incidunt magnam quaerat etiam).').split(' ').map(w=>w.replace(/[^a-z]/g,'')).filter(Boolean);
+function rnd(n){return Math.floor(Math.random()*n);}
+function sentence(){
+  const len=6+rnd(12);
+  const words=[];
+  for(let i=0;i<len;i++)words.push(CORPUS[rnd(CORPUS.length)]);
+  const s=words.join(' ');
+  return s[0].toUpperCase()+s.slice(1)+'.';
+}
+function paragraph(){
+  const n=3+rnd(4);
+  return Array.from({length:n},sentence).join(' ');
+}
+function gen(){
+  const n=Math.max(1,Math.min(100,parseInt(document.getElementById('count').value||'3',10)));
+  const unit=document.getElementById('unit').value;
+  let out='';
+  if(unit==='w'){
+    out=Array.from({length:n},()=>CORPUS[rnd(CORPUS.length)]).join(' ');
+    if(document.getElementById('classic').checked)out='Lorem ipsum dolor sit amet '+out;
+  }else if(unit==='s'){
+    out=Array.from({length:n},sentence).join(' ');
+    if(document.getElementById('classic').checked)out='Lorem ipsum dolor sit amet, consectetur adipiscing elit. '+out;
+  }else{
+    const parts=[];
+    for(let i=0;i<n;i++)parts.push(paragraph());
+    if(document.getElementById('classic').checked)parts[0]='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. '+parts[0];
+    out=parts.join('\n\n');
+  }
+  document.getElementById('out').value=out;
+  document.getElementById('msg').textContent='✓ Generated';
+}
+async function copyOut(){
+  const t=document.getElementById('out').value;
+  if(!t)return;
+  try{await navigator.clipboard.writeText(t);document.getElementById('msg').textContent='✓ Copied';}catch(e){}
+}
+gen();
+</script>
+</body>
+</html>

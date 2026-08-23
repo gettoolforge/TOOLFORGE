@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UUID Generator — Create v4 GUIDs Online (Bulk) | ToolForge</title>
+<meta name="description" content="Generate random UUIDs (version 4) instantly in your browser. One click or bulk-generate up to 500 at once. Free, private, no signup — nothing leaves your device.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/uuid-generator/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"UUID Generator","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input,button,select{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin:8px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  pre{background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;overflow:auto;display:none;font:14px/1.5 ui-monospace,Consolas,monospace;max-height:340px}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">UUID Generator</span></header>
+  <p><span class="badge">Cryptographically random</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>UUID Generator</h1>
+  <p class="sub">Generate RFC-compliant version-4 UUIDs (GUIDs) using your browser's crypto-grade randomness.</p>
+
+  <div class="card">
+    <label>How many? <select id="count"><option>1</option><option>5</option><option>10</option><option>25</option><option>50</option><option>100</option><option>500</option></select></label>
+    <label style="margin-left:16px"><input type="checkbox" id="upper" style="width:auto"> UPPERCASE</label>
+    <label style="margin-left:16px"><input type="checkbox" id="nobraces" style="width:auto" checked> Plain (no braces)</label>
+    <br>
+    <button onclick="gen()">Generate</button>
+    <button class="ghost" onclick="copyAll()">Copy all</button>
+    <button class="ghost" onclick="download()">Download .txt</button>
+    <pre id="out"></pre>
+  </div>
+
+  <h2>What is a UUID v4?</h2>
+  <ul>
+    <li>A 128-bit identifier formatted as <code>xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx</code> — the <code>4</code> marks version 4 (random), <code>y</code> is one of 8/9/a/b.</li>
+    <li><strong>Collision odds:</strong> you'd need to generate ~2.7 quintillion v4 UUIDs for a 50% chance of one duplicate. In practice: never happens.</li>
+    <li>This generator uses <code>crypto.getRandomValues()</code> — your OS's cryptographically secure RNG, not a weak math function.</li>
+    <li>Everything runs locally: the UUIDs never touch a server, so nobody can precompute or log them.</li>
+  </ul>
+
+  <h2>Common questions</h2>
+  <ul>
+    <li><strong>UUID vs GUID?</strong> Same thing — Microsoft calls it GUID, the rest of the world says UUID.</li>
+    <li><strong>Can I use these as database primary keys?</strong> Yes, though very large tables sometimes prefer sequential IDs for index performance — UUIDs win when IDs must be unique across systems or generated offline.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function uuid(){
+  if(crypto.randomUUID)return crypto.randomUUID();
+  const b=crypto.getRandomValues(new Uint8Array(16));
+  b[6]=b[6]&0x0f|0x40;b[8]=b[8]&0x3f|0x80;
+  const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+  return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20);
+}
+let last='';
+function gen(){
+  const n=parseInt(document.getElementById('count').value,10);
+  let out=[];
+  for(let i=0;i<n;i++){
+    let u=uuid();
+    if(document.getElementById('upper').checked)u=u.toUpperCase();
+    if(!document.getElementById('nobraces').checked)u='{'+u+'}';
+    out.push(u);
+  }
+  last=out.join('\n');
+  const o=document.getElementById('out');
+  o.textContent=last;o.style.display='block';
+}
+async function copyAll(){
+  if(!last)gen();
+  try{await navigator.clipboard.writeText(last);}catch(e){}
+}
+function download(){
+  if(!last)gen();
+  const blob=new Blob([last],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='uuids.txt';a.click();URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>

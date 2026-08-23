@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unix Timestamp Converter — Epoch to Date & Back | ToolForge</title>
+<meta name="description" content="Convert Unix timestamps to human dates and dates back to epoch seconds/milliseconds instantly. Live current timestamp. Free, private, no signup — runs in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/timestamp-converter/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Unix Timestamp Converter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input,button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-left:6px}
+  button.ghost{background:#232a38;color:var(--text)}
+  input{width:min(340px,100%)}
+  .now{color:var(--ok);font-family:ui-monospace,Consolas,monospace;font-weight:600}
+  #res{margin-top:12px;line-height:1.8;display:none}
+  #res b{color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Timestamp Converter</span></header>
+  <p><span class="badge">Auto-detects s/ms</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Unix Timestamp Converter</h1>
+  <p class="sub">Current Unix time: <span class="now" id="now">…</span> (updates every second)</p>
+
+  <div class="card">
+    <label for="in"><strong>Paste a timestamp or pick a date:</strong></strong></label><br><br>
+    <input id="in" placeholder="e.g. 1755936000 or 2026-08-23 15:30" autocomplete="off">
+    <input type="datetime-local" id="dt" aria-label="Pick date and time">
+    <button onclick="conv()">Convert</button>
+    <button class="ghost" onclick="useNow()">Use now</button>
+    <div id="res"></div>
+  </div>
+
+  <h2>What is a Unix timestamp?</h2>
+  <ul>
+    <li>It's the number of <strong>seconds since 1 Jan 1970 00:00 UTC</strong> (the "epoch"). Computers use it everywhere: databases, APIs, logs.</li>
+    <li><strong>10 digits</strong> = seconds (until Nov 2286). <strong>13 digits</strong> = milliseconds (JavaScript's <code>Date.now()</code>). This tool detects both automatically.</li>
+    <li>Timestamps are always UTC — your browser shows them in your local timezone above.</li>
+  </ul>
+
+  <h2>Common questions</h2>
+  <ul>
+    <li><strong>Why is my converted time off by hours?</strong> It isn't — the timestamp is UTC; the display converts to your local timezone.</li>
+    <li><strong>What happens in 2038?</strong> Old 32-bit systems overflow on 19 Jan 2038; modern 64-bit systems are fine until the year 292 billion.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function tick(){document.getElementById('now').textContent=Math.floor(Date.now()/1000);}
+tick();setInterval(tick,1000);
+function useNow(){document.getElementById('in').value=Math.floor(Date.now()/1000);conv();}
+function conv(){
+  const raw=document.getElementById('in').value.trim();
+  const res=document.getElementById('res');
+  if(!raw){res.style.display='none';return;}
+  let ms=null;
+  const t=raw.replace(/^["']|["']$/g,'');
+  if(/^\d{10}$/.test(t))ms=parseInt(t,10)*1000;
+  else if(/^\d{13}$/.test(t))ms=parseInt(t,10);
+  else{
+    const d=new Date(t);
+    if(!isNaN(d))ms=d.getTime();
+  }
+  if(ms===null||isNaN(ms)){
+    res.style.display='block';
+    res.innerHTML='<span style="color:#f87171">✗ Could not parse. Try 10-digit (seconds) or 13-digit (milliseconds), or a date like 2026-08-23 15:30.</span>';
+    return;
+  }
+  const d=new Date(ms);
+  res.style.display='block';
+  res.innerHTML=
+    '<b>'+d.toLocaleString(undefined,{dateStyle:'full',timeStyle:'medium'})+'</b><br>'+
+    'Seconds: <code>'+Math.floor(ms/1000)+'</code> · Milliseconds: <code>'+ms+'</code><br>'+
+    'UTC: <code>'+d.toUTCString()+'</code> · ISO 8601: <code>'+d.toISOString()+'</code><br>'+
+    'Day of week: '+d.toLocaleDateString(undefined,{weekday:'long'})+' · Week: '+isoWeek(d);
+}
+document.getElementById('dt').addEventListener('change',e=>{
+  if(e.target.value){document.getElementById('in').value=e.target.value;conv();}
+});
+function isoWeek(d){
+  const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=dt.getUTCDay()||7;
+  dt.setUTCDate(dt.getUTCDate()+4-day);
+  const y0=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  return Math.ceil(((dt-y0)/86400000+1)/7);
+}
+</script>
+</body>
+</html>
