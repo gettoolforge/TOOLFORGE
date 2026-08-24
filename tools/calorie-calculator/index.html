@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calorie Calculator (TDEE) — Daily Burn & Weight Goals | ToolForge</title>
+<meta name="description" content="Free TDEE calorie calculator: find your daily calorie burn (BMR + activity) and targets for losing or gaining weight. Mifflin-St Jeor formula, private, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/calorie-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Calorie Calculator","applicationCategory":"HealthApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label{display:inline-block;color:var(--mut);margin:8px 16px 0 0;font-size:.92rem}
+  input[type=number],select,button{font-size:1rem;border-radius:10px;padding:10px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  input[type=number]{width:110px}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:14px}
+  #out{margin-top:16px;line-height:2;display:none}
+  #out b.big{font-size:1.5rem;color:var(--ok)}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  td{padding:6px 8px;border-bottom:1px solid #232a38}
+  td:last-child{text-align:right;color:var(--ok);font-weight:600}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Calorie Calculator</span></header>
+  <p><span class="badge">Mifflin-St Jeor</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Calorie Calculator (TDEE)</h1>
+  <p class="sub">Your daily energy burn plus sensible targets for cutting or bulking — computed locally.</p>
+
+  <div class="card">
+    <label>Sex <select id="sex"><option value="m">Male</option><option value="f">Female</option></select></label>
+    <label>Age <input type="number" id="age" value="30" min="10" max="100"></label>
+    <label>Weight kg <input type="number" id="kg" value="75" min="30" step="any"></label>
+    <label>Height cm <input type="number" id="cm" value="178" min="120" step="any"></label>
+    <label>Activity <select id="act">
+      <option value="1.2">Sedentary (desk job)</option>
+      <option value="1.375" selected>Light (1–3 workouts/wk)</option>
+      <option value="1.55">Moderate (3–5/wk)</option>
+      <option value="1.725">Very active (6–7/wk)</option>
+      <option value="1.9">Athlete / physical job</option>
+    </select></label>
+    <br><button onclick="calc()">Calculate</button>
+    <div id="out">
+      <table>
+        <tr><td>BMR (at complete rest)</td><td id="bmr"></td></tr>
+        <tr><td>TDEE (maintenance calories)</td><td><b class="big" id="tdee"></b></td></tr>
+        <tr><td>Mild loss (−0.25 kg/wk)</td><td id="cut1"></td></tr>
+        <tr><td>Loss (−0.5 kg/wk)</td><td id="cut2"></td></tr>
+        <tr><td>Slow gain (+0.25 kg/wk)</td><td id="bulk"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2>Honest notes</h2>
+  <ul>
+    <li>Formula: <strong>Mifflin-St Jeor</strong> — the most accurate general BMR equation (~±10% for most people).</li>
+    <li>TDEE multiplies BMR by an activity factor that is necessarily approximate — track your weight for 2 weeks and adjust real intake based on what the scale does, not what any formula promises.</li>
+    <li>A ~250 kcal daily deficit ≈ −0.25 kg/week of fat; don't crash-diet below your BMR without medical supervision.</li>
+    <li>General information only, not medical advice.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calc(){
+  const age=parseFloat($('age').value),kg=parseFloat($('kg').value),cm=parseFloat($('cm').value);
+  if(!(age>0&&kg>0&&cm>0)){$('out').style.display='none';return;}
+  let bmr=10*kg+6.25*cm-5*age;
+  bmr+=($('sex').value==='m')?5:-161;
+  const tdee=bmr*parseFloat($('act').value);
+  $('bmr').textContent=Math.round(bmr)+' kcal';
+  $('tdee').textContent=Math.round(tdee)+' kcal/day';
+  $('cut1').textContent=Math.round(tdee-275)+' kcal';
+  $('cut2').textContent=Math.round(tdee-550)+' kcal';
+  $('bulk').textContent=Math.round(tdee+275)+' kcal';
+  $('out').style.display='block';
+}
+['sex','age','kg','cm','act'].forEach(id=>$(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

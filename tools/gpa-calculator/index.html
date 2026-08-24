@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPA Calculator — US 4.0 Scale (Semester GPA) | ToolForge</title>
+<meta name="description" content="Free GPA calculator: enter courses with grades and credit hours to get your semester or cumulative GPA on the 4.0 scale. Private, instant, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/gpa-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GPA Calculator","applicationCategory":"EducationalApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=text],input[type=number],select{font-size:.98rem;border-radius:9px;padding:9px 11px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  .row{display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap}
+  .row input[type=text]{flex:1;min-width:160px}
+  .row select{width:110px}
+  .row input[type=number]{width:90px}
+  button{background:var(--acc);color:#fff;border:0;border-radius:9px;padding:9px 15px;font-size:.95rem;cursor:pointer}
+  button.ghost{background:#232a38;color:var(--text)}
+  .rm{background:none;border:none;color:var(--mut);font-size:1.1rem;cursor:pointer;padding:4px 8px}
+  .rm:hover{color:var(--err,var(--mut))}
+  #gpa{font-size:3rem;font-weight:800;color:var(--ok);margin-top:14px}
+  #gpaLabel{color:var(--mut)}
+  h2{margin-top:26px}ul{padding-left:22px}table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th,td{padding:6px 8px;border-bottom:1px solid #232a38;text-align:right}
+  th:first-child,td:first-child{text-align:left}th{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">GPA Calculator</span></header>
+  <p><span class="badge">Weighted & unweighted</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>GPA Calculator</h1>
+  <p class="sub">Add your courses — get semester GPA on the standard 4.0 scale, with optional +/− precision and AP/honors weighting.</p>
+
+  <div class="card">
+    <div id="rows"></div>
+    <button onclick="addRow()" class="ghost" style="margin-top:4px">+ Add course</button>
+    <button onclick="calc()">Calculate GPA</button>
+    <label style="margin-left:14px"><input type="checkbox" id="plusminus" style="width:auto"> Use +/− grades (A− = 3.7 …)</label>
+    <label><input type="checkbox" id="ap" style="width:auto"> Count AP/Honors as weighted (+1.0 for A–F rows marked AP)</label>
+    <div id="gpa"></div>
+    <div id="gpaLabel"></div>
+  </div>
+
+  <h2>Standard 4.0 scale used</h2>
+  <table>
+    <thead><tr><th>Letter</th><th>Unweighted</th><th>+ / −</th></tr></thead>
+    <tbody>
+      <tr><td>A</td><td>4.0</td><td>4.0 (A+ also 4.0)</td></tr>
+      <tr><td>A−</td><td>4.0</td><td>3.7</td></tr>
+      <tr><td>B+</td><td>3.0</td><td>3.3</td></tr>
+      <tr><td>B</td><td>3.0</td><td>3.0</td></tr>
+      <tr><td>B−</td><td>3.0</td><td>2.7</td></tr>
+      <tr><td>C+ / C / C−</td><td>2.0</td><td>2.3 / 2.0 / 1.7</td></tr>
+      <tr><td>D range</td><td>1.0</td><td>1.3 / 1.0 / 0.7</td></tr>
+      <tr><td>F</td><td>0.0</td><td>0.0</td></tr>
+    </tbody>
+  </table>
+
+  <p class="muted" style="margin-top:14px">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function addRow(name='',grade='A',credits='3'){
+  const row=document.createElement('div');
+  row.className='row';
+  row.innerHTML='<input type="text" placeholder="Course name (optional)" value="'+name+'">'+
+    '<select>'+['A+','A','A-','B+','B','B-','C+','C','C-','D+','D','D-','F'].map(g=>'<option'+(g===grade?' selected':'')+'>'+g+'</option>').join('')+'</select>'+
+    '<input type="number" min="1" max="12" step="any" value="'+credits+'" title="Credit hours">'+
+    '<label style="margin:0;color:var(--mut)"><input type="checkbox" class="apflag" style="width:auto"> AP/H</label>'+
+    '<button class="rm" title="Remove">×</button>';
+  row.querySelector('.rm').addEventListener('click',()=>row.remove());
+  $('rows').appendChild(row);
+}
+const BASE={'A+':4,'A':4,'A-':4,'B+':3,'B':3,'B-':3,'C+':2,'C':2,'C-':2,'D+':1,'D':1,'D-':1,'F':0};
+const PM={'+':[0.3,0],'−':['-',-0.3]};
+function gradePoints(letter,usePM,isAP){
+  let v;
+  if(!usePM){v=BASE[letter];}
+  else{
+    const base=BASE[letter];
+    if(letter.endsWith('-'))v=Math.max(0,base-0.3);
+    else if(letter==='A+')v=4;
+    else if(letter.endsWith('+'))v=Math.min(4,base+0.3);
+    else v=base;
+  }
+  // AP weight applies to the unweighted-style bump only when not using +/-? Standard schools add +1 to base scale
+  if(isAP)v=Math.min(5,v+ (letter[0]==='A'||letter[0]==='B'||letter[0]==='C'||letter[0]==='D'?1:0));
+  return v;
+}
+function calc(){
+  const rows=[...document.querySelectorAll('#rows .row')];
+  let pts=0,credits=0,count=0;
+  for(const r of rows){
+    const letter=r.querySelector('select').value;
+    const cr=parseFloat(r.querySelector('input[type=number]').value)||0;
+    if(cr<=0)continue;
+    pts+=gradePoints(letter,$('plusminus').checked,r.querySelector('.apflag').checked)*cr;
+    credits+=cr;count++;
+  }
+  if(credits<=0){$('gpa').textContent='';$('gpaLabel').textContent='Add at least one course with credits.';return;}
+  const gpa=pts/credits;
+  $('gpa').textContent=gpa.toFixed(2);
+  $('gpaLabel').textContent='GPA across '+count+' course'+(count===1?'':'s')+', '+credits+' credit hours';
+}
+// start with 5 example rows
+[['Math','A',4],['History','B',3],['Chemistry AP','A-',4],['English','B+',3],['Spanish','A-',2]].forEach(r=>addRow(...r));
+['plusminus','ap'].forEach(id=>$(id).addEventListener('change',calc));
+calc();
+</script>
+</body>
+</html>

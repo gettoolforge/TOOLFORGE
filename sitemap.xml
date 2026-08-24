@@ -26,4 +26,10 @@
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/sleep-calculator/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/date-difference-calculator/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/discount-calculator/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/bpm-detector/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/key-detector/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/calorie-calculator/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/words-to-pages/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/gpa-calculator/</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/aspect-ratio-calculator/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
 </urlset>

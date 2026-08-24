@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Words to Pages Converter — Essay Length Estimator | ToolForge</title>
+<meta name="description" content="Free words-to-pages converter: how many pages is 500, 1000 or 2500 words? Single/double spaced, 12pt Times or Arial. Plus reading and speaking time.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/words-to-pages/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Words to Pages Converter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=number],select,input[type=text],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:12px}
+  label{color:var(--mut);margin-right:12px;font-size:.92rem}
+  #big{font-size:2.2rem;font-weight:800;color:var(--ok);margin-top:14px;min-height:1.3em}
+  #detail{color:var(--mut);line-height:1.9}
+  table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.92rem}
+  th,td{padding:6px 8px;border-bottom:1px solid #232a38;text-align:right}
+  th{color:var(--mut);text-align:right}th:first-child,td:first-child{text-align:left}
+  h2{margin-top:26px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Words → Pages</span></header>
+  <p><span class="badge">Bidirectional</span><span class="badge">Single & double spaced</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Words to Pages Converter</h1>
+  <p class="sub">“How many pages is 1000 words?” — for standard formatting (12pt Times New Roman/Arial, 1-inch margins).</p>
+
+  <div class="card">
+    <label>I know my:</label>
+    <select id="dir"><option value="w2p">word count</option><option value="p2w">page count</option></select><br><br>
+    <span id="inWrap"><label>Words:</label> <input type="number" id="words" value="1000" min="0"></span>
+    <span id="outWrap" style="display:none"><label>Pages:</label> <input type="number" id="pages" value="2" min="0" step="any"></label></span>
+    <label style="margin-left:16px">Spacing:</label>
+    <select id="spacing"><option value="single">Single spaced</option><option value="double">Double spaced</option><option value="15">1.5 spaced</option></select>
+    <div id="big"></div>
+    <div id="detail"></div>
+  </div>
+
+  <h2>Quick reference (single / double spaced)</h2>
+  <table id="ref">
+    <thead><tr><th>Words</th><th>Pages (single)</th><th>Pages (double)</th><th>Reading time</th><th>Speaking time</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <p class="muted" style="margin-top:16px">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+// standard: ~500 words/page single, ~250 double, ~333 at 1.5
+function wpp(){const s=$('spacing').value;return s==='single'?500:s==='double'?250:333;}
+function calc(){
+  const per=wpp();
+  if($('dir').value==='w2p'){
+    const w=Math.max(0,parseInt($('words').value||'0',10));
+    $('big').textContent=w.toLocaleString()+' words ≈ '+(w/per).toFixed(per>=500?1:2)+' page'+((w/per)>=2?'s':'');
+    $('detail').innerHTML=
+      'Reading time (200 wpm): <b style="color:var(--ok)">'+fmtTime(w/200)+'</b> · Speaking (130 wpm): <b style="color:var(--ok)">'+fmtTime(w/130)+'</b>';
+  }else{
+    const p=Math.max(0,parseFloat($('pages').value||'0'));
+    const w=Math.round(p*per);
+    $('big').textContent=p+' page'+(p===1?'':'s')+' ≈ '+w.toLocaleString()+' words';
+    $('detail').innerHTML='Reading time: <b style="color:var(--ok)">'+fmtTime(w/200)+'</b>';
+  }
+}
+function fmtTime(mins){
+  mins=Math.max(0,mins);
+  const m=Math.round(mins);
+  return m<60?m+' min':Math.floor(m/60)+' h '+(m%60)+' min';
+}
+$('dir').addEventListener('change',()=>{
+  const w=$('dir').value==='w2p';
+  $('inWrap').style.display=w?'inline':'none';
+  $('outWrap').style.display=w?'none':'inline';
+  calc();
+});
+['words','pages','spacing'].forEach(id=>$(id).addEventListener('input',calc));
+(function(){
+  const rows=[[250,'high school short'],[500,'one page essay'],[750,'short blog'],[1000,'common essay'],[1500,'long blog'],[2000,'college paper'],[3000,'term paper'],[5000,'long report']];
+  document.querySelector('#ref tbody').innerHTML=rows.map(([w,d])=>{
+    return '<tr><td>'+w.toLocaleString()+' <span style="color:var(--mut)">('+d+')</span></td><td>'+(w/500).toFixed(1)+'</td><td>'+(w/250).toFixed(1)+'</td><td>'+fmtTime(w/200)+'</td><td>'+fmtTime(w/130)+'</td></tr>';
+  }).join('');
+})();
+calc();
+</script>
+</body>
+</html>
