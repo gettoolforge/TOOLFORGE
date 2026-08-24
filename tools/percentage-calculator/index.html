@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Percentage Calculator — 3 Modes: Of, Is-What-%, Change | ToolForge</title>
+<meta name="description" content="Free percentage calculator: find X% of Y, what percent X is of Y, and percentage increase or decrease. Instant answers with formulas shown. No signup, runs in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/percentage-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Percentage Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=text],input[type=number]{font-size:1rem;border-radius:10px;padding:10px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);width:130px}
+  input:focus{outline:none;border-color:var(--acc)}
+  .mode{margin-bottom:6px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  #ans{margin-top:12px;font-size:1.35rem;font-weight:700;color:var(--ok);min-height:1.5em}
+  .formula{color:var(--mut);font-size:.9rem;margin-top:4px;font-family:ui-monospace,Consolas,monospace}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Percentage Calculator</span></header>
+  <p><span class="badge">All 3 question types</span><span class="badge">Live as you type</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Percentage Calculator</h1>
+  <p class="sub">The three questions everyone actually asks — pick one, type two numbers, done.</p>
+
+  <div class="card mode">
+    <strong>① What is <input type="number" id="a1" value="15" step="any">% of <input type="number" id="a2" value="80" step="any">?</strong>
+    <div class="row"><span id="ansA"></span></div>
+    <div class="formula">answer = a% × b ÷ 100</div>
+  </div>
+
+  <div class="card mode">
+    <strong>② <input type="number" id="b1" value="25" step="any"> is what percent of <input type="number" id="b2" value="200" step="any">?</strong>
+    <div class="row"><span id="ansB"></span></div>
+    <div class="formula">answer = a ÷ b × 100</div>
+  </div>
+
+  <div class="card mode">
+    <strong>③ Change from <input type="number" id="c1" value="100" step="any"> to <input type="number" id="c2" value="120" step="any"></strong>
+    <div class="row"><span id="ansC"></span></div>
+    <div class="formula">answer = (new − old) ÷ old × 100</div>
+  </div>
+
+  <h2>Quick mental-math tricks</h2>
+  <ul>
+    <li><strong>10% of anything:</strong> move the decimal point one step left. 10% of 249 → 24.9</li>
+    <li><strong>5%</strong> = half of 10%. <strong>15%</strong> = 10% + 5%.</li>
+    <li><strong>x% of y = y% of x</strong> — 8% of 50 is easier as 50% of 8 (= 4).</li>
+    <li>A 20% discount then another 20% off ≠ 40% off — it's 36% (the second applies to the reduced price).</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function num(el){const v=parseFloat(el.value.replace(',','.'));return isNaN(v)?null:v;}
+function fmt(n){return parseFloat(n.toPrecision(12)).toString();}
+function updA(){const a=num($('a1')),b=num($('a2'));$('ansA').textContent=(a!==null&&b!==null)?fmt(a*b/100):'';}
+function updB(){const a=num($('b1')),b=num($('b2'));$('ansB').textContent=(a!==null&&b!==null&&b!==0)?fmt(a/b*100)+'%':(b===0?'∞ (can\'t divide by zero)':'');}
+function updC(){const o=num($('c1')),n=num($('c2'));if(o===null||n===null||o===0){$('ansC').textContent=o===0&&n!==null?'∞ (old value was zero)':'';return;}
+ const ch=(n-o)/o*100;$('ansC').textContent=(ch>0?'▲ +':ch<0?'▼ ':'')+fmt(ch)+'%';}
+['a1','a2'].forEach(i=>$(i).addEventListener('input',updA));
+['b1','b2'].forEach(i=>$(i).addEventListener('input',updB));
+['c1','c2'].forEach(i=>$(i).addEventListener('input',updC));
+updA();updB();updC();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loan / EMI Calculator — Monthly Payment & Total Interest | ToolForge</title>
+<meta name="description" content="Free loan calculator: monthly EMI payment, total interest and full amortization year table for any loan amount, rate and term. No signup, private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/loan-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Loan Calculator (EMI)","applicationCategory":"FinanceApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label{display:inline-block;color:var(--mut);margin:6px 18px 0 0;font-size:.92rem}
+  input[type=number]{font-size:1rem;border-radius:10px;padding:10px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);width:150px}
+  input:focus{outline:none;border-color:var(--acc)}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 20px;font-size:1rem;cursor:pointer;margin-top:14px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #err{color:var(--err);margin-top:8px;min-height:1.3em}
+  .results{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .rbox{flex:1;min-width:160px;background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:14px;text-align:center}
+  .rbox b{display:block;font-size:1.3rem;color:var(--ok)}
+  .rbox span{color:var(--mut);font-size:.82rem}
+  table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.88rem;display:none}
+  th,td{padding:7px 8px;border-bottom:1px solid #232a38;text-align:right}
+  th{color:var(--mut);font-weight:600}td:first-child,th:first-child{text-align:left}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Loan Calculator (EMI)</span></header>
+  <p><span class="badge">Amortization table</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Loan / EMI Calculator</h1>
+  <p class="sub">The standard bank formula: what a loan actually costs per month — and in total interest.</p>
+
+  <div class="card">
+    <label>Loan amount<br><input type="number" id="p" value="20000" min="1" step="any"></label>
+    <label>Annual rate %<br><input type="number" id="r" value="6.5" min="0" step="any"></label>
+    <label>Years<br><input type="number" id="t" value="5" min="0" max="50" step="any"></label>
+    <br><button onclick="calc()">Calculate</button>
+    <button class="ghost" onclick="document.getElementById('tbl').style.display=document.getElementById('tbl').style.display==='table'?'none':'table'">Show/hide yearly table</button>
+    <div id="err"></div>
+    <div class="results">
+      <div class="rbox"><b id="emi">—</b><span>Monthly payment</span></div>
+      <div class="rbox"><b id="tot">—</b><span>Total repaid</span></div>
+      <div class="rbox"><b id="ti">—</b><span>Total interest</span></div>
+    </div>
+    <table id="tbl"><thead><tr><th>Year</th><th>Principal paid</th><th>Interest paid</th><th>Balance left</th></tr></thead><tbody id="tb"></tbody></table>
+  </div>
+
+  <h2>What the numbers mean</h2>
+  <ul>
+    <li>Formula: <code>EMI = P·i·(1+i)ⁿ / ((1+i)ⁿ − 1)</code>, i = monthly rate, n = months.</li>
+    <li>Early payments are mostly <strong>interest</strong>; the balance barely moves at first — that's amortization.</li>
+    <li>Paying even a little extra each month attacks the principal early and can cut years off the loan.</li>
+    <li>Mathematical estimate only — your lender's exact fees, insurance and rounding may differ.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function emi(P,annualPct,years){
+  const i=annualPct/100/12,n=Math.round(years*12);
+  if(n===0)return {emi:NaN,tot:P,ti:0};
+  if(i===0)return {emi:P/n,tot:P,ti:0};
+  const g=Math.pow(1+i,n);
+  const e=P*i*g/(g-1);
+  return {emi:e,tot:e*n,ti:e*n-P,n};
+}
+function calc(){
+  const P=parseFloat($('p').value),r=parseFloat($('r').value),t=parseFloat($('t').value);
+  if(!(P>0)||isNaN(r)||!(t>0)){$('err').textContent='⚠ Fill all three fields';return;}
+  $('err').textContent='';
+  const {emi:E,tot,ti}=emi(P,r,t);
+  $('emi').textContent='€'+E.toFixed(2);
+  $('tot').textContent='€'+tot.toLocaleString(undefined,{maximumFractionDigits:0});
+  $('ti').textContent='€'+ti.toLocaleString(undefined,{maximumFractionDigits:0})+' ('+(ti/P*100).toFixed(0)+'% of loan)';
+  // yearly amortization
+  const i=r/100/12,n=Math.round(t*12);
+  let bal=P,rows='';
+  let yPrin=0,yInt=0;
+  for(let mo=1;mo<=n;mo++){
+    const int=bal*i;
+    const prin=E-int;
+    yPrin+=prin;yInt+=int;
+    bal-=(E-int);
+    if(bal<0.005)bal=0;
+    if(mo%12===0||mo===n){
+      rows+='<tr><td>'+Math.ceil(mo/12)+'</td><td>€'+yPrin.toLocaleString(undefined,{maximumFractionDigits:0})+'</td><td>€'+yInt.toLocaleString(undefined,{maximumFractionDigits:0})+'</td><td>€'+bal.toLocaleString(undefined,{maximumFractionDigits:0})+'</td></tr>';
+      yPrin=0;yInt=0;
+    }
+  }
+  $('tb').innerHTML=rows;
+  $('tbl').style.display='table';
+}
+['p','r','t'].forEach(id=>$(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

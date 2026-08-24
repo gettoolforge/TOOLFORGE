@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Date Difference Calculator — Days Between Two Dates | ToolForge</title>
+<meta name="description" content="Free date calculator: days, weeks, months and years between any two dates — plus business days. Countdown or elapsed time. No signup, private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/date-difference-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Date Difference Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label{margin-right:10px;color:var(--mut)}
+  input[type=date],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:12px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #err{color:#f87171;min-height:1.4em;margin-top:8px}
+  .results{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .rbox{flex:1;min-width:150px;background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:14px;text-align:center}
+  .rbox b{display:block;font-size:1.4rem;color:var(--ok)}
+  .rbox span{color:var(--mut);font-size:.82rem}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Date Difference</span></header>
+  <p><span class="badge">Business days too</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Date Difference Calculator</h1>
+  <p class="sub">Days between two dates — for deadlines, holidays, project timelines and "how long until…".</p>
+
+  <div class="card">
+    <label>From</label> <input type="date" id="from">
+    <label style="margin-left:14px">To</label> <input type="date" id="to">
+    <br><button onclick="calc()">Calculate</button>
+    <button class="ghost" onclick="toToday()">To = today</button>
+    <div id="err"></div>
+    <div class="results">
+      <div class="rbox"><b id="days">—</b><span>Total days</span></div>
+      <div class="rbox"><b id="weeks">—</b><span>Weeks + days</span></div>
+      <div class="rbox"><b id="bus">—</b><span>Business days (Mon–Fri)</span></div>
+      <div class="rbox"><b id="ymd">—</b><span>Calendar span</span></div>
+    </div>
+  </div>
+
+  <h2>Good to know</h2>
+  <ul>
+    <li>The count includes the start date but not the end date (the standard convention) — so today → tomorrow = 1 day.</li>
+    <li><strong>Business days</strong> skip Saturdays and Sundays but count public holidays (they differ by country).</li>
+    <li>Works backwards too — put the later date in "From". The result is always positive.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function parse(v){return v?new Date(v+'T00:00:00'):null;}
+function calc(){
+  const a=parse(document.getElementById('from').value);
+  const b=parse(document.getElementById('to').value);
+  const err=document.getElementById('err');
+  if(!a||!b){err.textContent='⚠ Pick both dates';return;}
+  if(a>b){err.textContent='';[a,b].reverse?null:null;
+    // swap silently
+    let tmp=a; // note: const binding — use values
+  }
+  let d1=a,d2=b;
+  if(a.getTime()>b.getTime()){d1=b;d2=a;}
+  err.textContent='';
+  const days=Math.round((d2-d1)/86400000);
+  document.getElementById('days').textContent=days.toLocaleString();
+  document.getElementById('weeks').textContent=Math.floor(days/7)+'w '+(days%7)+'d';
+  // business days
+  let bus=0;
+  const cur=new Date(d1);
+  for(let i=0;i<days;i++){
+    const dow=cur.getDay();
+    if(dow!==0&&dow!==6)bus++;
+    cur.setDate(cur.getDate()+1);
+  }
+  document.getElementById('bus').textContent=bus.toLocaleString();
+  // calendar y/m/d
+  let y=d2.getFullYear()-d1.getFullYear(),m=d2.getMonth()-d1.getMonth(),dd=d2.getDate()-d1.getDate();
+  if(dd<0){m--;dd+=new Date(d2.getFullYear(),d2.getMonth(),0).getDate();}
+  if(m<0){y--;m+=12;}
+  document.getElementById('ymd').textContent=y+'y '+m+'m '+dd+'d';
+}
+function toToday(){document.getElementById('to').value=new Date().toISOString().slice(0,10);calc();}
+['from','to'].forEach(id=>document.getElementById(id).addEventListener('change',calc));
+// defaults
+document.getElementById('from').value=new Date().toISOString().slice(0,10);
+calc();
+</script>
+</body>
+</html>

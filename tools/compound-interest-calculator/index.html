@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compound Interest Calculator — Investment Growth | ToolForge</title>
+<meta name="description" content="Free compound interest calculator: see savings grow with contributions and monthly compounding. Year-by-year table included. No signup, private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/compound-interest-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Compound Interest Calculator","applicationCategory":"FinanceApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label{display:inline-block;color:var(--mut);margin:6px 18px 0 0;font-size:.92rem}
+  input[type=number]{font-size:1rem;border-radius:10px;padding:10px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);width:150px}
+  input:focus{outline:none;border-color:var(--acc)}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 20px;font-size:1rem;cursor:pointer;margin-top:14px}
+  button.ghost{background:#232a38;color:var(--text)}
+  .results{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+  .rbox{flex:1;min-width:170px;background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:14px;text-align:center}
+  .rbox b{display:block;font-size:1.35rem;color:var(--ok)}
+  .rbox span{color:var(--mut);font-size:.82rem}
+  table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.9rem;display:none}
+  th,td{padding:7px 8px;border-bottom:1px solid #232a38;text-align:right}
+  th{color:var(--mut);font-weight:600}td:first-child,th:first-child{text-align:left}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Compound Interest</span></header>
+  <p><span class="badge">Monthly compounding</span><span class="badge">Year-by-year table</span><span class="badge">100% private</span><span class="badge">Free</span></p>
+  <h1>Compound Interest Calculator</h1>
+  <p class="sub">Watch savings grow: starting amount + monthly contributions + compound growth = your future pot.</p>
+
+  <div class="card">
+    <label>Starting amount<br><input type="number" id="p" value="1000" min="0" step="any"></label>
+    <label>Monthly contribution<br><input type="number" id="pmt" value="100" min="0" step="any"></label>
+    <label>Annual rate %<br><input type="number" id="r" value="7" min="-100" step="any"></label>
+    <label>Years<br><input type="number" id="t" value="10" min="0" max="80" step="1"></label>
+    <br><button onclick="calc()">Calculate</button>
+    <button class="ghost" onclick="document.getElementById('tbl').style.display=document.getElementById('tbl').style.display==='table'?'none':'table'">Show/hide year table</button>
+    <div class="results">
+      <div class="rbox"><b id="fv">—</b><span>Future value</span></div>
+      <div class="rbox"><b id="inv">—</b><span>You put in</span></div>
+      <div class="rbox"><b id="int">—</b><span>Interest earned</span></div>
+    </div>
+    <table id="tbl"><thead><tr><th>Year</th><th>Contributions</th><th>Interest earned</th><th>Total</th></tr></thead><tbody id="tb"></tbody></table>
+  </div>
+
+  <h2>The math (and the magic)</h2>
+  <ul>
+    <li>Monthly compounding formula: <code>FV = P(1+i)ⁿ + PMT × [((1+i)ⁿ − 1)/i]</code>, where i = annual rate ÷ 12, n = months.</li>
+    <li><strong>Time beats amount:</strong> €200/mo at 7% for 30 years ≈ €244k, of which only €72k is yours — the rest is interest on interest.</li>
+    <li>The "Rule of 72": at r% per year, money doubles in ≈ 72/r years. At 7% → ~10.3 years.</li>
+    <li>This shows mathematical growth, not financial advice — real returns vary and inflation shrinks future buying power.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calc(){
+  const P=Math.max(0,parseFloat($('p').value)||0);
+  const pmt=Math.max(0,parseFloat($('pmt').value)||0);
+  const rate=parseFloat($('r').value);
+  const t=Math.max(0,Math.min(80,parseInt($('t').value||'0',10)));
+  if(isNaN(rate)||isNaN(t))return;
+  const i=rate/100/12,n=t*12;
+  let bal=P,growth;
+  if(i===0){bal=P+pmt*n;}
+  else{
+    const g=Math.pow(1+i,n);
+    bal=P*g+(pmt===0?0:pmt*((g-1)/i)*(1+i)); // annuity-due style end-of-month? use ordinary annuity:
+    // recompute with ordinary annuity for standard results:
+    bal=P*Math.pow(1+i,n)+(pmt===0?0:pmt*((Math.pow(1+i,n)-1)/i));
+  }
+  const invested=P+pmt*n;
+  $('fv').textContent='€'+bal.toLocaleString(undefined,{maximumFractionDigits:0});
+  $('inv').textContent='€'+invested.toLocaleString(undefined,{maximumFractionDigits:0});
+  $('int').textContent='€'+(bal-invested).toLocaleString(undefined,{maximumFractionDigits:0});
+  // year table
+  let rows='',yBal=P,yInv=P,accum=0;
+  const mi=i;
+  for(let y=1;y<=t;y++){
+    for(let mo=0;mo<12;mo++){
+      if(mi===0)yBal+=pmt;
+      else{
+        yBal*=(1+mi);
+        yBal+=pmt;
+        accum=yBal-(P+pmt*y*1);
+      }
+    }
+    yInv=P+pmt*y;
+    rows+='<tr><td>'+y+'</td><td>€'+yInv.toLocaleString(undefined,{maximumFractionDigits:0})+'</td><td>€'+(yBal-yInv).toLocaleString(undefined,{maximumFractionDigits:0})+'</td><td>€'+yBal.toLocaleString(undefined,{maximumFractionDigits:0})+'</td></tr>';
+  }
+  $('tb').innerHTML=rows;
+  $('tbl').style.display='table';
+}
+['p','pmt','r','t'].forEach(id=>$(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

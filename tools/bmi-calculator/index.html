@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMI Calculator — Metric & Imperial with Healthy Range | ToolForge</title>
+<meta name="description" content="Free BMI calculator (Body Mass Index) for metric and imperial units. Instant result with WHO category and your personal healthy weight range. No signup, private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/bmi-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BMI Calculator","applicationCategory":"HealthApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--warn:#fbbf24;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=number],button,select{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:10px;margin-right:8px}
+  input[type=number]{width:130px}
+  label{margin-right:10px;color:var(--mut)}
+  #big{font-size:2.6rem;font-weight:800;text-align:center;margin-top:10px;min-height:1.3em}
+  #cat{text-align:center;font-weight:700;min-height:1.6em;font-size:1.1rem}
+  #range{text-align:center;color:var(--mut);margin-top:6px}
+  .scale{display:flex;border-radius:99px;overflow:hidden;height:10px;max-width:420px;margin:16px auto 4px}
+  .scale i{flex:1}
+  #marker{position:relative;max-width:420px;margin:0 auto;height:18px;display:none}
+  #marker b{position:absolute;top:-22px;transform:translateX(-50%);font-size:.85rem;color:var(--acc)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">BMI Calculator</span></header>
+  <p><span class="badge">Metric + Imperial</span><span class="badge">Healthy range</span><span class="badge">100% private</span><span class="badge">Free</span></p>
+  <h1>BMI Calculator</h1>
+  <p class="sub">Body Mass Index with the standard WHO categories and the weight range that would be "normal" for your height.</p>
+
+  <div class="card">
+    <label>Units:</label>
+    <select id="units"><option value="m">Metric (kg / cm)</option><option value="i">Imperial (lb / ft+in)</option></select>
+    <div class="row" style="margin-top:14px">
+      <label>Weight <input type="number" id="w" step="any" placeholder="70"></label>
+      <span id="hWrap"><label>Height (cm) <input type="number" id="h" step="any" placeholder="175"></label></span>
+      <span id="hImp" style="display:none">
+        <label>Height ft <input type="number" id="hft" min="0" step="1" placeholder="5"></label>
+        <label>+ in <input type="number" id="hin" min="0" max="11" step="any" placeholder="9"></label>
+      </span>
+    </div>
+    <button onclick="calc()">Calculate BMI</button>
+    <div id="big"></div>
+    <div id="cat"></div>
+    <div class="scale">
+      <i style="background:#38bdf8"></i><i style="background:#34d399;width:28%"></i><i style="background:#fbbf24;width:24%"></i><i style="background:#f87171"></i>
+    </div>
+    <div id="marker"><b>▲ you</b></div>
+    <div id="range"></div>
+  </div>
+
+  <h2>Honest limits of BMI</h2>
+  <ul>
+    <li>BMI = weight ÷ height². It's a <strong>screening number for populations</strong>, not a diagnosis of individuals.</li>
+    <li>It can't tell muscle from fat — athletes often score "overweight" while being perfectly healthy.</li>
+    <li>The same BMI means different health risk at different ages and ethnicities (WHO notes higher risk thresholds for some Asian populations).</li>
+    <li>Use it as one signal among several — waist size, blood work and how you feel matter more.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function whoCat(b){
+  if(b<18.5)return ['Underweight','#38bdf8',((b-10)/(40-10))];
+  if(b<25)return ['Normal weight','#34d399',((b-10)/(40-10))];
+  if(b<30)return ['Overweight','#fbbf24',((b-10)/(40-10))];
+  return ['Obesity','#f87171',Math.min(1,(b-10)/(40-10))];
+}
+function calc(){
+  const u=$('units').value;
+  let kg,m;
+  if(u==='m'){
+    const w=parseFloat($('w').value),hcm=parseFloat($('h').value);
+    if(!(w>0)||!(hcm>30)){reset();return;}
+    kg=w;m=hcm/100;
+  }else{
+    const w=parseFloat($('w').value);
+    const ft=parseFloat($('hft').value||'0'),inch=parseFloat($('hin').value||'0');
+    if(!(w>0)||!(ft+inch>0)){reset();return;}
+    kg=w*0.45359237;m=(ft*12+inch)*0.0254;
+  }
+  const bmi=kg/(m*m);
+  const [name,color,pos]=whoCat(bmi);
+  $('big').textContent=bmi.toFixed(1);
+  $('big').style.color=color;
+  $('cat').innerHTML='<span style="color:'+color+'">'+name+'</span>';
+  const mk=$('marker');mk.style.display='block';
+  mk.innerHTML='<b style="left:'+(pos*100).toFixed(1)+'%">▼ you ('+bmi.toFixed(1)+')</b>';
+  // healthy range for this height: BMI 18.5–24.9
+  const lo=(18.5*m*m),hi=(24.9*m*m);
+  $('range').textContent='Healthy weight range for your height: '+(u==='m'?lo.toFixed(1)+'–'+hi.toFixed(1)+' kg':(lo/0.45359237).toFixed(0)+'–'+(hi/0.45359237).toFixed(0)+' lb')+' (WHO: BMI 18.5–24.9)';
+}
+function reset(){$('big').textContent='';$('cat').textContent='';$('range').textContent='';$('marker').style.display='none';}
+$('units').addEventListener('change',()=>{
+  const imp=$('units').value==='i';
+  $('hWrap').style.display=imp?'none':'block';
+  $('hImp').style.display=imp?'inline':'none';
+});
+['w','h','hft','hin'].forEach(i=>$(i).addEventListener('input',calc));
+</script>
+</body>
+</html>

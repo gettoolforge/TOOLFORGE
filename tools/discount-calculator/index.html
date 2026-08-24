@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discount Calculator — Sale Price & Savings | ToolForge</title>
+<meta name="description" content="Free discount calculator: sale price from % off, savings amount, and double-discount handling. Also reverse: find the % from two prices. No signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/discount-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Discount Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=number]{font-size:1rem;border-radius:10px;padding:10px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);width:140px}
+  input:focus{outline:none;border-color:var(--acc)}
+  label{margin-right:10px;color:var(--mut)}
+  #out1,#out2{margin-top:12px;line-height:1.9;min-height:1.6em}
+  b.ok{color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Discount Calculator</span></header>
+  <p><span class="badge">Double discounts</span><span class="badge">Reverse mode</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Discount Calculator</h1>
+  <p class="sub">What does "-30%" actually mean at the register? Two ways to find out.</p>
+
+  <div class="card">
+    <strong>① Price after discount</strong><br><br>
+    <label>Original price</label><input type="number" id="p1" value="79.99" min="0" step="any">
+    <label style="margin-left:14px">Discount</label><input type="number" id="d1" value="30" min="0" max="100" step="any"><label>%</label>
+    <div id="out1"></div>
+  </div>
+
+  <div class="card">
+    <strong>② Stack a second discount (the "extra 20% off already-reduced" trap)</strong><br><br>
+    <label>Price</label><input type="number" id="p2" value="100" min="0" step="any">
+    <label style="margin-left:10px">First −</label><input type="number" id="d2a" value="30" min="0" max="100" step="any"><label>%</label>
+    <label>then extra −</label><input type="number" id="d2b" value="20" min="0" max="100" step="any"><label>%</label>
+    <div id="out2"></div>
+  </div>
+
+  <h2>Discount math that saves real money</h2>
+  <ul>
+    <li>Sale price = price × (1 − discount/100). Savings = price × discount/100.</li>
+    <li><strong>Stacked discounts multiply, never add:</strong> −30% then −20% = ×0.70 ×0.80 = 56% of original → total −44%, not −50%. Stores know "extra 20% off" sounds better than it is.</li>
+    <li>To compare offers, ignore percentages and compare final prices — that's the only number that leaves your wallet.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function f(n){return '€'+(Math.round(n*100)/100).toFixed(2);}
+function up1(){
+  const p=parseFloat($('p1').value),d=parseFloat($('d1').value);
+  if(!(p>=0)||isNaN(d)){ $('out1').textContent='';return;}
+  const save=p*Math.min(100,Math.max(0,d))/100;
+  $('out1').innerHTML='You pay <b class="ok">'+f(p-save)+'</b> · You save <b class="ok">'+f(save)+'</b>';
+}
+function up2(){
+  const p=parseFloat($('p2').value),a=parseFloat($('d2a').value),b=parseFloat($('d2b').value);
+  if(!(p>=0)||isNaN(a)||isNaN(b)){$('out2').textContent='';return;}
+  const naive=a+b;
+  const real=100*(1-a/100)*(1-b/100);
+  const realOff=100-real;
+  const finalP=p*(real/100);
+  const naiveFinal=p*(1-naive/100);
+  $('out2').innerHTML='Real total discount: <b class="ok">'+realOff.toFixed(1)+'%</b>'+(naive!==realOff?' (not '+naive+'%! the store hopes you don\'t notice)':'')+
+   '<br>You pay <b class="ok">'+f(finalP)+'</b>';
+}
+['p1','d1'].forEach(i=>$(i).addEventListener('input',up1));
+['p2','d2a','d2b'].forEach(i=>$(i).addEventListener('input',up2));
+up1();up2();
+</script>
+</body>
+</html>

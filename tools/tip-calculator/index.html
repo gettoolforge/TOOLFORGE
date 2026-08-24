@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tip Calculator — Tip % + Bill Split Per Person | ToolForge</title>
+<meta name="description" content="Free tip calculator with bill splitting: pick a tip percentage or type your own, split between any number of people. Instant results, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/tip-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Tip Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=number]{font-size:1.05rem;border-radius:10px;padding:11px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);width:170px}
+  input:focus{outline:none;border-color:var(--acc)}
+  label{color:var(--mut);font-size:.92rem;margin-right:14px}
+  button{background:#232a38;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:9px 15px;font-size:.95rem;cursor:pointer;margin:12px 6px 0 0}
+  button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+  #customWrap{display:none;margin-left:6px}
+  #customWrap input{width:80px}
+  .results{margin-top:16px;line-height:2}
+  .results b{color:var(--ok);font-size:1.15rem}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Tip Calculator</span></header>
+  <p><span class="badge">Split bills</span><span class="badge">Custom %</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Tip Calculator</h1>
+  <p class="sub">Bill + tip % ÷ people = what each person pays. Live as you type.</p>
+
+  <div class="card">
+    <label>Bill amount</label><input type="number" id="bill" value="85.50" min="0" step="any"><br><br>
+    <label>Tip</label>
+    <button data-tip="0">0%</button><button data-tip="10">10%</button><button data-tip="15" class="active">15%</button><button data-tip="18">18%</button><button data-tip="20">20%</button><button data-tip="25">25%</button>
+    <span id="customWrap"><input type="number" id="custom" placeholder="custom %" min="0" max="100" step="any"></span>
+    <br><br>
+    <label>Split between</label> <input type="number" id="people" value="2" min="1" max="99" step="1"><label>people</label>
+    <div class="results">
+      Tip amount: <b id="tipAmt"></b><br>
+      Total with tip: <b id="total"></b><br>
+      Each person pays: <b id="per"></b>
+    </div>
+  </div>
+
+  <h2>Tipping quick guide (US norms)</h2>
+  <ul>
+    <li><strong>Restaurant table service:</strong> 15–20% is standard; 20%+ for excellent service.</li>
+    <li><strong>Takeaway/counter:</strong> usually 0–10%.</li>
+    <li><strong>Taxi / delivery:</strong> ~10–15%; delivery often has a minimum (~€/$2–5).</li>
+    <li>In much of Europe service is included — tipping there is a small round-up, not an obligation.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let tipPct=15;
+function upd(){
+  const bill=parseFloat($('bill').value)||0;
+  const people=Math.max(1,Math.trunc(parseInt($('people').value||'1',10)));
+  const tip=bill*tipPct/100;
+  const total=bill+tip;
+  $('tipAmt').textContent='€'+tip.toFixed(2);
+  $('total').textContent='€'+total.toFixed(2);
+  $('per').textContent='€'+(total/people).toFixed(2);
+}
+document.querySelectorAll('button[data-tip]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('button[data-tip]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    $('customWrap').style.display='none';
+    tipPct=parseFloat(b.dataset.tip);
+    upd();
+  });
+});
+$('custom').addEventListener('input',e=>{
+  document.querySelectorAll('button[data-tip]').forEach(x=>x.classList.remove('active'));
+  $('customWrap').style.display='inline';
+  e.target.style.display='inline';
+  tipPct=parseFloat(e.target.value)||0;
+  upd();
+});
+// make the custom field reachable: clicking "25%"-adjacent area? simpler: add a Custom chip
+['bill','people'].forEach(id=>$(id).addEventListener('input',upd));
+upd();
+</script>
+</body>
+</html>

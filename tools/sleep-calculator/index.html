@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sleep Calculator — Wake Up Between 90-Min Cycles | ToolForge</title>
+<meta name="description" content="Free sleep calculator: find the best bedtime or wake-up time based on 90-minute sleep cycles. Wake between cycles, not during deep sleep. No signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/sleep-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Sleep Calculator","applicationCategory":"HealthApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=time],select,input[type=number],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:12px}
+  label{margin-right:12px;color:var(--mut)}
+  .times{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .t{flex:1;min-width:150px;background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;text-align:center}
+  .t b{display:block;font-size:1.5rem;color:var(--ok)}
+  .t span{color:var(--mut);font-size:.82rem}
+  .t.best{border-color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Sleep Calculator</span></header>
+  <p><span class="badge">90-min cycles</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Sleep Calculator</h1>
+  <p class="sub">Wake at the end of a sleep cycle, not in the middle of one — that's what "waking up refreshed" actually means.</p>
+
+  <div class="card">
+    <label>I want to:</label>
+    <select id="mode"><option value="wake">know when to sleep (I have a wake-up time)</option><option value="sleep">know when to wake (I'm going to bed now)</option></select>
+    <br><br>
+    <span id="timeLabel">Wake-up time:</span> <input type="time" id="time">
+    <label style="margin-left:16px">Time to fall asleep: <select id="latency"><option value="0">0 min</option><option value="10" selected>10 min</option><option value="15">15 min</option><option value="20">20 min</option></select></label>
+    <br><button onclick="calc()">Calculate</button>
+    <div class="times" id="out"></div>
+  </div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>One sleep cycle ≈ <strong>90 minutes</strong>: light → deep → REM. Waking mid-cycle (deep phase) causes that groggy "hit by a truck" feeling.</li>
+    <li>This tool steps in full cycles from your target time and subtracts the minutes it takes you to fall asleep.</li>
+    <li>Adults do best with <strong>5–6 cycles (7½–9 h)</strong>. Fewer than 4 cycles regularly = accumulating sleep debt.</li>
+    <li>Cycle length varies person to person (~80–100 min) — treat this as a starting point, then adjust by how you feel.</li>
+    <li>General information only — not medical advice for sleep disorders.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function fmt(mins){
+  mins=((mins%1440)+1440)%1440;
+  const h=Math.floor(mins/60),m=mins%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+function toMin(hhmm){
+  if(!hhmm)return null;
+  const [h,m]=hhmm.split(':').map(Number);
+  return h*60+m;
+}
+function calc(){
+  const t=toMin(document.getElementById('time').value);
+  const out=document.getElementById('out');
+  if(t===null){out.innerHTML='';return;}
+  const lat=parseInt(document.getElementById('latency').value,10)||0;
+  const mode=document.getElementById('mode').value;
+  let html='';
+  // cycles from 6 down to 3
+  for(const c of [6,5,4,3]){
+    let mark;
+    if(mode==='wake'){
+      // bedtime = wake - cycles*90 - latency
+      mark=fmt(t-c*90-lat);
+      html+='<div class="t'+(c===5?' best':'')+'"><b>'+mark+'</b><span>sleep at · '+c+' cycles ('+(c*90/60)+' h sleep)</span></div>';
+    }else{
+      // wake = bedtime + latency + cycles*90
+      mark=fmt(t+lat+c*90);
+      html+='<div class="t'+(c===5?' best':'')+'"><b>'+mark+'</b><span>wake at · '+c+' cycles ('+(c*90/60)+' h sleep)</span></div>';
+    }
+  }
+  document.getElementById('out').innerHTML=html;
+}
+document.getElementById('time').addEventListener('input',calc);
+document.getElementById('latency').addEventListener('change',calc);
+document.getElementById('mode').addEventListener('change',()=>{document.getElementById('timeLabel').textContent=document.getElementById('mode').value==='wake'?'Wake-up time:':'Bedtime:';calc();});
+// default: 07:00 wake
+document.getElementById('time').value='07:00';
+calc();
+</script>
+</body>
+</html>
