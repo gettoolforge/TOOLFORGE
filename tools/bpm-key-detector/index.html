@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BPM & Key Detector — Analyze Any Song or Beat | ToolForge</title>
+<meta name="description" content="Free online BPM and musical key detector: upload a song or beat and get tempo + key instantly. 100% in your browser — your audio never leaves your device. For DJs and producers.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/bpm-key-detector/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BPM & Key Detector","applicationCategory":"MultimediaApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0;text-align:center}
+  /* FIXED drop zone: block element, full width, no label-wrapper quirks */
+  .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+        border:2px dashed #2b3342;border-radius:12px;padding:36px 20px;cursor:pointer;
+        transition:border-color .15s,background .15s;width:100%;background:transparent}
+  .drop:hover,.drop.over{border-color:var(--acc);background:rgba(79,140,255,.05)}
+  .drop input{display:none}
+  .drop .big{font-size:1.1rem;font-weight:700}
+  .drop .small{color:var(--mut);font-size:.9rem}
+  #status{margin-top:14px;color:var(--mut);min-height:1.5em}
+  .results{display:none;margin-top:8px}
+  .resgrid{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  .rbox{flex:1;min-width:180px;max-width:280px;background:#0c0e13;border:1px solid #2b3342;border-radius:12px;padding:16px}
+  .rbox .lbl{color:var(--mut);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+  .rbox .val{font-size:2.4rem;font-weight:800;color:var(--ok);line-height:1.2}
+  .rbox .sub{color:var(--mut);font-size:.85rem;margin-top:4px;min-height:1.4em}
+  #alts{color:var(--mut);font-size:.92rem;margin-top:12px}
+  #alts b{color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:16px;display:none}
+  h2{margin-top:26px;text-align:left}ul{text-align:left;padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">BPM & Key Detector</span></header>
+  <p><span class="badge">Upload & analyze</span><span class="badge">100% private — no server upload</span><span class="badge">Free</span></p>
+  <h1>BPM & Key Detector</h1>
+  <p class="sub">Drop in a song or beat — get its <strong>tempo</strong> and <strong>musical key</strong> in one pass, analyzed entirely on your device.</p>
+
+  <div class="card">
+    <div class="drop" id="drop" role="button" tabindex="0" aria-label="Choose or drop an audio file">
+      <input type="file" id="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac">
+      <span class="big">🎵 Click or drop an audio file</span>
+      <span class="small">MP3 · WAV · M4A · OGG · FLAC — analyzed locally, never uploaded</span>
+    </div>
+    <div id="status"></div>
+    <div class="results" id="results">
+      <div class="resgrid">
+        <div class="rbox"><div class="lbl">Tempo</div><div class="val" id="bpmVal">—</div><div class="sub" id="bpmSub"></div></div>
+        <div class="rbox"><div class="lbl">Key</div><div class="val" id="keyVal">—</div><div class="sub" id="keySub"></div></div>
+      </div>
+      <div id="alts"></div>
+    </div>
+    <button id="again">Analyze another file</button>
+  </div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li><strong>BPM:</strong> onset-energy envelope + autocorrelation with harmonic candidate voting. Half-time / double-time interpretations are shown because a 140 BPM trap beat legitimately reads as 70 at the half-note level.</li>
+    <li><strong>Key:</strong> FFT chromagram correlated against Krumhansl-Kessler psychoacoustic key profiles across all 24 major/minor keys, with runner-up candidates listed.</li>
+    <li><strong>Accuracy notes:</strong> works best on steady-beat music (electronic, hip-hop, pop) with harmonic content (chords, melody). Drum-only loops weaken key detection; live drumming weakens BPM. For produced beats, results are usually solid.</li>
+    <li><strong>Privacy by architecture:</strong> decoding happens with the Web Audio API in your browser — no server ever receives your file. That's why this can be free.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const KK_MAJOR=[6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88];
+const KK_MINOR=[6.33,2.68,3.52,5.38,2.60,3.53,2.54,4.75,3.98,2.69,3.34,3.17];
+let ctx=null;
+
+/* ---------- UI wiring ---------- */
+const drop=$('drop'),file=$('file');
+drop.addEventListener('click',()=>file.click());
+drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click();}});
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)analyze(f);});
+file.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])analyze(e.target.files[0]);});
+$('again').addEventListener('click',reset);
+
+/* ---------- analysis entry ---------- */
+async function analyze(f){
+  $('again').style.display='none';
+  $('results').style.display='none';
+  if(!f.type.startsWith('audio')&&!/\.(mp3|wav|m4a|ogg|flac|aac)$/i.test(f.name)){
+    $('status').textContent='⚠ That doesn\'t look like an audio file.';return;
+  }
+  try{
+    $('status').textContent='Decoding '+f.name+' …';
+    if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const buf=await ctx.decodeAudioData(await f.arrayBuffer());
+    $('status').textContent='Analyzing '+Math.round(buf.duration)+'s of audio …';
+    await new Promise(r=>setTimeout(r,30));
+    // mono mixdown once, shared by both detectors
+    const mono=mixdown(buf);
+    const bpm=detectBpm(mono,buf.sampleRate);
+    const key=detectKey(mono,buf.sampleRate);
+    $('status').textContent='✓ '+f.name;
+    // BPM panel
+    if(bpm){
+      $('bpmVal').textContent=bpm.toFixed(1);
+      const alts=[];
+      [[2,'double'],[0.5,'half'],[4/3,'triplet'],[1.5,'dotted']].forEach(([m,n])=>{
+        const v=bpm*m;if(v>=50&&v<=220)alts.push(v.toFixed(1)+' ('+n+')');
+      });
+      $('bpmSub').textContent='also: '+alts.join(' · ');
+    }else{
+      $('bpmVal').textContent='—';
+      $('bpmSub').textContent='no steady beat found';
+    }
+    // Key panel
+    if(key){
+      $('keyVal').textContent=key.label;
+      // relative-pair honesty: if a top alternate is the relative major/minor (same notes),
+      // cap confidence and say so — no detector can fully resolve that from triads alone
+      let relAmb=false;
+      const parts=key.label.split(' ');
+      const tA=NOTE_NAMES.indexOf(parts[0]);
+      for(const a of key.alts){
+        const ap=a.label.split(' ');
+        const tB=NOTE_NAMES.indexOf(ap[0]);
+        const dist=((tB-tA)%12+12)%12;
+        if((dist===9&&parts[1]==='major'&&ap[1]==='minor')||(dist===3&&parts[1]==='minor'&&ap[1]==='major')){relAmb=true;break;}
+      }
+      const conf=relAmb?Math.min(key.confidence,0.55):key.confidence;
+      $('keySub').textContent='confidence '+(conf*100).toFixed(0)+'%'+(relAmb?' — relative key equally possible':(conf<0.3?' (low)':''));
+      $('alts').innerHTML='Other key candidates: <b>'+key.alts.map(a=>a.label+' ('+(a.confidence*100).toFixed(0)+'%)').join('</b> · <b>')+'</b>';
+    }else{
+      $('keyVal').textContent='—';
+      $('keySub').textContent='not enough harmonic content';
+      $('alts').textContent='';
+    }
+    $('results').style.display='block';
+    $('again').style.display='inline-block';
+  }catch(e){
+    $('status').textContent='✗ Could not decode this file ('+e.message+')';
+  }
+}
+function mixdown(buf){
+  const L=buf.getChannelData(0);
+  if(buf.numberOfChannels===1)return L;
+  const R=buf.getChannelData(1);
+  const m=new Float32Array(L.length);
+  for(let i=0;i<L.length;i++)m[i]=(L[i]+R[i])*0.5;
+  return m;
+}
+function reset(){
+  $('results').style.display='none';$('again').style.display='none';
+  $('status').textContent='';file.value='';
+}
+
+/* ---------- BPM: v6 verified algorithm ---------- */
+function detectBpm(L,sr){
+  const hop=512,fps=sr/hop;
+  const envLen=Math.floor(L.length/hop);
+  if(envLen<64)return null;
+  const env=new Float32Array(envLen);
+  for(let i=0;i<envLen;i++){let s=0;for(let j=0;j<hop;j++)s+=L[i*hop+j]**2;env[i]=Math.sqrt(s);}
+  const onset=new Float32Array(envLen);
+  for(let i=1;i<envLen;i++)onset[i]=Math.max(0,env[i]-env[i-1]);
+  let mean=0;for(let i=0;i<envLen;i++)mean+=onset[i];mean/=envLen;
+  for(let i=0;i<envLen;i++)onset[i]=Math.max(0,onset[i]-mean);
+  const minLag=Math.max(2,Math.floor(fps*60/300));
+  const maxLag=Math.min(envLen-2,Math.ceil(fps*60/40));
+  let gm=0;
+  const ac=new Float64Array(maxLag+1);
+  for(let lag=minLag;lag<=maxLag;lag++){
+    let s=0;for(let k=0;k+lag<envLen;k++)s+=onset[k]*onset[k+lag];
+    ac[lag]=s/(envLen-lag);if(ac[lag]>gm)gm=ac[lag];
+  }
+  if(gm<=0)return null;
+  const readAC=f=>{
+    if(f<minLag||f>maxLag)return null;
+    const lo=Math.floor(f),hi=Math.ceil(f);
+    const v=lo===hi?ac[lo]:ac[lo]*(hi-f)+ac[hi]*(f-lo);
+    return v/gm;
+  };
+  // score all, then apply tempo prior: music mostly lives 70-140; a candidate >140 whose
+  // half also scores within 90% is demoted in favor of the half
+  const scored=[];
+  for(let b=60;b<=200;b++){
+    const lag=fps*60/b;
+    let sum=0;
+    for(let mult=1;mult<=4;mult++){
+      const v=readAC(lag*mult);
+      sum+=(v===null?0:v);
+    }
+    scored.push({b,s:sum/4});
+  }
+  const get=b=>{const x=scored.find(x=>x.b===b);return x?x.s:0;};
+  let best=null,bestS=-1;
+  for(const {b,s} of scored){
+    let adj=s;
+    if(b>140){const half=get(b/2)||get(Math.round(b/2));if(half>=s*0.4)adj=s*0.35;}
+    if(b<70){const dbl=get(b*2)||get(Math.round(b*2));if(dbl>=s*0.9)adj=s*0.6;}
+    if(adj>bestS){bestS=adj;best=b;}
+  }
+  return best;
+}
+
+/* ---------- KEY: chromagram + Krumhansl-Kessler ---------- */
+function fft(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){
+    let bit=n>>1;
+    for(;j&bit;bit>>=1)j^=bit;
+    j|=bit;
+    if(i<j){let t=re[i];re[i]=re[j];re[j]=t;let t2=im[i];im[i]=im[j];im[j]=t2;}
+  }
+  for(let len=2;len<=n;len<<=1){
+    const ang=-2*Math.PI/len;
+    const wr=Math.cos(ang),wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){
+      let cr=1,ci=0;
+      for(let k=0;k<len/2;k++){
+        const ur=re[i+k],ui=im[i+k];
+        const vr=re[i+k+len/2]*cr-im[i+k+len/2]*ci;
+        const vi=re[i+k+len/2]*ci+im[i+k+len/2]*cr;
+        re[i+k]=ur+vr;im[i+k]=ui+vi;
+        re[i+k+len/2]=ur-vr;im[i+k+len/2]=ui-vi;
+        const ncr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=ncr;
+      }
+    }
+  }
+}
+function chromagram(L,sr){
+  const N=4096;
+  const frames=Math.min(400,Math.max(20,Math.floor((L.length-N)/(N*0.75))));
+  const stride=Math.max(Math.floor(N*0.75),Math.floor((L.length-N)/frames));
+  const chroma=new Float64Array(12);
+  const win=new Float32Array(N);
+  for(let i=0;i<N;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/N);
+  const re=new Float32Array(N),im=new Float32Array(N);
+  for(let f=0;f<frames;f++){
+    const off=f*stride;
+    if(off+N>L.length)break;
+    for(let i=0;i<N;i++){re[i]=L[off+i]*win[i];im[i]=0;}
+    fft(re,im);
+    for(let j=1;j<N/2;j++){
+      const mag=Math.sqrt(re[j]*re[j]+im[j]*im[j]);
+      const freq=j*sr/N;
+      if(freq<55||freq>2093)continue;
+      const midi=12*Math.log2(freq/440)+69;
+      const pc=((Math.round(midi)%12)+12)%12;
+      chroma[pc]+=mag;
+    }
+  }
+  let sum=0;for(let i=0;i<12;i++)sum+=chroma[i];
+  if(sum<=0)return null;
+  for(let i=0;i<12;i++)chroma[i]/=sum;
+  return chroma;
+}
+function pearson(a,b){
+  const n=a.length;let ma=0,mb=0;
+  for(let i=0;i<n;i++){ma+=a[i];mb+=b[i];}
+  ma/=n;mb/=n;
+  let num=0,da=0,db=0;
+  for(let i=0;i<n;i++){const xa=a[i]-ma,xb=b[i]-mb;num+=xa*xb;da+=xa*xa;db+=xb*xb;}
+  return (da&&db)?num/Math.sqrt(da*db):-1;
+}
+function detectKey(L,sr){
+  const chroma=chromagram(L,sr);
+  if(!chroma)return null;
+  const results=[];
+  for(let tonic=0;tonic<12;tonic++){
+    for(const [mode,profile] of [['major',KK_MAJOR],['minor',KK_MINOR]]){
+      const prof=new Array(12);
+      for(let i=0;i<12;i++)prof[i]=profile[((i-tonic)%12+12)%12];
+      results.push({tonic,mode,label:NOTE_NAMES[tonic]+' '+mode,r:pearson(chroma,prof)});
+    }
+  }
+  // tonic-presence weighting: a key whose tonic pitch class is actually strong in the audio
+  // is more likely than its relative (which shares all notes but centers elsewhere)
+  const maxChroma=Math.max(...Array.from(chroma));
+  for(const x of results){
+    const tonicPresence=chroma[x.tonic]/maxChroma;
+    const fifth=chroma[(x.tonic+7)%12]/maxChroma;
+    x.rAdj=x.r*(0.45+0.55*tonicPresence)*(0.85+0.15*fifth);
+  }
+  results.sort((a,b)=>b.rAdj-a.rAdj);
+  const best=results[0];
+  // confidence: gap between winner and 7th (median-ish) candidate
+  const confidence=Math.max(0,Math.min(1,(best.rAdj-results[6].rAdj)*1.4));
+  const alts=results.slice(1,4).map(x=>({label:x.label,confidence:Math.max(0,Math.min(1,x.rAdj))}));
+  return {label:best.label,confidence,alts};
+}
+</script>
+</body>
+</html>
