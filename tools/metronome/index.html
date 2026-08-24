@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metronome Online — Precise Tempo Tapper | ToolForge</title>
+<meta name="description" content="Free online metronome with tap-tempo: set any BPM from 30 to 300, pick time signature and subdivision. Runs silently accurate in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/metronome/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Online Metronome","applicationCategory":"MultimediaApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:22px;margin:18px 0;text-align:center}
+  #bpmdisplay{font-size:3.6rem;font-weight:800;color:var(--ok);line-height:1;margin:8px 0}
+  input[type=range]{width:min(420px,90%);accent-color:var(--acc)}
+  button{background:#232a38;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:10px 16px;font-size:.95rem;cursor:pointer;margin:6px 4px 0}
+  button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+  #startBtn{background:var(--ok);color:#04110a;border:0;font-size:1.05rem;padding:12px 34px;font-weight:700}
+  #startBtn.playing{background:var(--err);color:#fff}
+  .dots{display:flex;gap:10px;justify-content:center;margin:14px 0}
+  .dot{width:18px;height:18px;border-radius:50%;background:#232a38;border:1px solid #2b3342}
+  .dot.on{background:var(--acc);box-shadow:0 0 10px rgba(79,140,255,.7);transform:scale(1.15)}
+  .dot.down{background:var(--err);box-shadow:0 0 10px rgba(248,113,113,.6)}
+  select{font-size:.95rem;border-radius:9px;padding:8px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  label{color:var(--mut);font-size:.92rem;margin-right:8px}
+  h2{margin-top:26px;text-align:left}ul{text-align:left;padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Metronome</span></header>
+  <p><span class="badge">Sample-accurate timing</span><span class="badge">Tap tempo</span><span class="badge">Free</span></p>
+  <h1>Online Metronome</h1>
+  <p class="sub">Practice with a click that never drifts — scheduled by the Web Audio clock, not setTimeout.</p>
+
+  <div class="card">
+    <div class="dots" id="dots"></div>
+    <div id="bpmdisplay">120</div>
+    <input type="range" id="slider" min="30" max="300" value="120" step="1" aria-label="BPM slider">
+    <br>
+    <button id="minus10">−10</button><button id="minus1">−1</button><button id="plus1">+1</button><button id="plus10">+10</button>
+    <label style="margin-left:18px">Time signature:</label>
+    <select id="sig"><option>4/4</option><option>3/4</option><option>2/4</option><option>6/8</option><option>5/4</option><option>7/8</option></select>
+    <label style="margin-left:14px">Subdivision:</label>
+    <select id="sub"><option value="1">Quarter notes</option><option value="2">Eighth notes</option><option value="4">Sixteenth notes</option></select>
+    <br><button id="startBtn">▶ Start</button>
+    <button id="tapBtn">👋 Tap tempo (click repeatedly)</button>
+    <div style="margin-top:8px;color:var(--mut);font-size:.85rem">Space = start/stop · T = tap</div>
+  </div>
+
+  <h2>Tempo reference marks</h2>
+  <ul>
+    <li><strong>60 BPM</strong> = one beat per second · <strong>90</strong> chill hip-hop · <strong>120</strong> house/pop standard</li>
+    <li><strong>140</strong> trap/drum'n'bass territory · <strong>160+</strong> fast punk / speed metal</li>
+    <li>Practice tip: master a passage at a slow tempo before pushing speed — accuracy first, then the metronome pushes you.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+let audioCtx=null;
+let playing=false,bpm=120,currentBeat=0,nextNoteTime=0,timerID=null;
+const sigSel=$=id=>document.getElementById(id);
+function beatsPerBar(){const s=sigSel('sig').value;return parseInt(s.split('/')[0],10);}
+function subMul(){return parseInt(sigSel('sub').value,10);}
+function drawDots(){
+  const total=beatsPerBar()*subMul();
+  const d=sigSel('dots');d.innerHTML='';
+  for(let i=0;i<total;i++){
+    const dot=document.createElement('span');
+    dot.className='dot'+(i===currentBeat?' on':(i%subMul===0?' down':''));
+    d.appendChild(dot);
+  }
+}
+function schedule(){
+  const secondsPerBeat=60/bpm/subMul();
+  while(nextNoteTime<audioCtx.currentTime+0.12){
+    const isDown=(currentBeat%(subMul())===0);
+    click(nextNoteTime,isDown?1200:800,isDown?0.35:0.18);
+    highlight(currentBeat,nextNoteTime);
+    currentBeat=(currentBeat+1)%(beatsPerBar()*subMul());
+    nextNoteTime+=secondsPerBeat;
+  }
+}
+function highlight(beat,when){
+  const delay=Math.max(0,(when-audioCtx.currentTime)*1000);
+  setTimeout(()=>{
+    const dots=document.getElementById('dots').children;
+    for(const d of dots)d.className='dot'+(d===dots[beat]?(beat%subMul()===0?' on':' on'):'');
+    if(dots[beat])dots[beat].className='dot on'+((beat%(subMul())===0)?' down':'');
+  },delay);
+}
+function click(time,freq,gain){
+  const osc=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  osc.frequency.value=freq;
+  osc.type='square';
+  g.gain.setValueAtTime(gain,time);
+  g.gain.exponentialRampToValueAtTime(0.001,time+0.05);
+  osc.connect(g);g.connect(audioCtx.destination);
+  osc.start(time);osc.stop(time+0.06);
+}
+function start(){
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  audioCtx.resume();
+  playing=true;currentBeat=0;
+  nextNoteTime=audioCtx.currentTime+0.06;
+  timerID=setInterval(schedule,25);
+  sigSel('startBtn').textContent='■ Stop';
+  sigSel('startBtn').classList.add('playing');
+}
+function stop(){
+  playing=false;clearInterval(timerID);
+  sigSel('startBtn').textContent='▶ Start';
+  sigSel('startBtn').classList.remove('playing');
+}
+sigSel('startBtn').addEventListener('click',()=>playing?stop():start());
+function setBpm(v){
+  v=Math.max(30,Math.min(300,Math.round(v)));
+  bpm=v;
+  sigSel('bpmdisplay').textContent=v;
+  sigSel('slider').value=v;
+}
+sigSel('slider').addEventListener('input',e=>setBpm(e.target.value));
+[['minus10',-10],['minus1',-1],['plus1',1],['plus10',10]].forEach(([id,d])=>sigSel(id).addEventListener('click',()=>setBpm(bpm+d)));
+['sig','sub'].forEach(id=>sigSel(id).addEventListener('change',()=>{drawDots();if(playing){currentBeat=0;}}));
+// tap tempo
+let taps=[];
+function tap(){
+  const now=performance.now();
+  if(taps.length&&now-taps[taps.length-1]>2500)taps=[];
+  taps.push(now);
+  if(taps.length>=2){
+    let sum=0;
+    for(let i=1;i<taps.length;i++)sum+=taps[i]-taps[i-1];
+    const avg=sum/(taps.length-1);
+    setBpm(Math.round(60000/avg));
+  }
+  // keep last 6 taps
+  if(taps.length>6)taps.shift();
+}
+sigSel('tapBtn').addEventListener('click',tap);
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();playing?stop():start();}
+  if(e.key==='t'||e.key==='T')tap();
+});
+drawDots();
+</script>
+</body>
+</html>

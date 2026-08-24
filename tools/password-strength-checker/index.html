@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Password Strength Checker — Test How Secure It Is | ToolForge</title>
+<meta name="description" content="Check password strength instantly: entropy estimate, crack-time estimates and specific improvement tips. Tested locally — your password never leaves your device.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/password-strength-checker/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Password Strength Checker","applicationCategory":"SecurityApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--warn:#fbbf24;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=text]{width:min(100%,520px);font-size:1.05rem;border-radius:10px;padding:12px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);font-family:ui-monospace,Consolas,monospace}
+  input:focus{outline:none;border-color:var(--acc)}
+  label.chk{display:block;margin-top:10px;color:var(--mut);font-size:.9rem}
+  input.show{width:auto;margin-right:6px}
+  #meter{height:10px;border-radius:99px;background:#232a38;margin-top:14px;overflow:hidden}
+  #meter i{display:block;height:100%;width:0;transition:all .25s ease;border-radius:99px}
+  #verdict{font-weight:700;margin-top:8px;font-size:1.15rem}
+  ul.finds{list-style:none;padding-left:0}
+  ul.finds li{padding:4px 0;border-bottom:1px dashed #232a38}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Password Strength Checker</span></header>
+  <p><span class="badge">Never transmitted</span><span class="badge">Entropy math</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Password Strength Checker</h1>
+  <p class="sub">Type (or paste) a password — see how long it would survive an attack and what would make it stronger. Analysis happens in your browser only.</p>
+
+  <div class="card">
+    <input type="text" id="pw" placeholder="Type a password to test…" autocomplete="off">
+    <label class="chk"><input type="checkbox" id="show" class="show"> Show password</label>
+    <div id="meter"><i id="bar"></i></div>
+    <div id="verdict"></div>
+    <div id="crack" style="color:var(--mut);margin-top:6px"></div>
+    <ul class="finds" id="finds" style="margin-top:14px"></ul>
+  </div>
+
+  <h2>How strength is measured</h2>
+  <ul>
+    <li><strong>Entropy (bits)</strong> = length × log2(alphabet size). Each bit doubles attack time — length is king.</li>
+    <li>Crack times assume an offline attacker with fast hardware (~100 billion guesses/sec) checking common substitutions too.</li>
+    <li>Patterns like <code>password123</code>, <code>qwerty</code>, keyboard walks or years fall to dictionary attacks far faster than raw math suggests — flagged below when detected.</li>
+    <li><strong>This page can't leak your password:</strong> there is no server component at all.</li>
+    <li>Best practice: use our <a href="../password-generator/" style="color:var(--acc)">Password Generator</a> for new ones and a password manager to remember them.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const COMMON=['password','passwort','salasana','qwerty','letmein','welcome','admin','iloveyou',
+'123456','654321','abc123','monkey','dragon','football','baseball','master','sunshine','princess',
+'summer','winter','spring','autumn','hello','freedom','whatever','trustno1','starwars'];
+const YEARS=/19\d\d|20[0-2]\d/;
+function charsetSize(pw){
+  let s=0;
+  if(/[a-z]/.test(pw))s+=26;
+  if(/[A-Z]/.test(pw))s+=26;
+  if(/\d/.test(pw))s+=10;
+  if(/[^A-Za-z0-9\s]/.test(pw))s+=33;
+  return s;
+}
+function hasSequence(pw){
+  const lower=pw.toLowerCase();
+  for(let i=0;i<lower.length-2;i++){
+    const a=lower.charCodeAt(i),b=lower.charCodeAt(i+1),c=lower.charCodeAt(i+2);
+    if(b===a+1&&c===a+2)return true;
+    if(b===a-1&&c===a-2)return true;
+  }
+  return false;
+}
+function analyze(pw){
+  const findings=[];
+  let notes=[];
+  const lower=pw.toLowerCase();
+  // common word check
+  for(const w of COMMON){
+    if(lower.includes(w)){findings.push('⚠ Contains the very common word "'+w+'" — dictionary attacks try these first.');break;}
+  }
+  if(YEARS.test(pw))findings.push('⚠ Contains a year — attackers append/try years automatically.');
+  if(hasSequence(pw))findings.push('⚠ Contains a run of sequential characters (like "abc" or "321").');
+  if(/^(.)\1+$/.test(pw)&&pw.length>2)findings.push('⚠ Same character repeated throughout.');
+  if(/^[A-Z][a-z]+\d{1,4}[!?.]?$/.test(pw))findings.push('⚠ Matches the classic "Word + digits + symbol" pattern — much weaker than it looks.');
+  // effective charset after penalizing repeats
+  const unique=new Set(pw).size;
+  let pool=charsetSize(pw);
+  let bits=Math.round(pw.length*Math.log2(Math.max(2,pool)));
+  if(unique<pw.length*0.5){bits=Math.round(bits*0.7);findings.push('⚠ More than half the characters repeat — reduces effective randomness.');}
+  // crack time at 1e11 guesses/s
+  const seconds=Math.pow(2,bits-1)/1e11;
+  function human(sec){
+    if(sec<1)return 'instantly';
+    const units=[[60,'seconds'],[60,'minutes'],[24,'hours'],[365,'days'],[1000000,'years'],[1e9,'millennia']];
+    let v=sec,label='seconds';
+    if(v<60)return v.toFixed(1)+' seconds';
+    v/=60;if(v<60)return v.toFixed(1)+' minutes';
+    v/=60;if(v<24)return v.toFixed(1)+' hours';
+    v/=24;if(v<365)return v.toFixed(1)+' days';
+    v/=365;if(v<1000000)return Math.round(v).toLocaleString()+' years';
+    v/=1e6;if(v<1e9)return Math.round(v).toLocaleString()+' million years';
+    return 'billions of years';
+  }
+  let col,w,word;
+  if(bits<35){col='#f87171';w='20%';word='Very weak';}
+  else if(bits<55){col='#fb923c';w='40%';word='Weak';}
+  else if(bits<70){col='#fbbf24';w='60%';word='Moderate';}
+  else if(bits<90){col='#34d399';w='80%';word='Strong';}
+  else{col='#22d3ee';w='100%';word='Extremely strong';}
+  if(findings.length===0&&bits>=55)findings.push('✓ No common patterns detected. Length × variety is doing the work.');
+  else{
+    if(pw.length<12)findings.push('→ Make it longer: every extra character multiplies attack time.');
+    if(!/\d/.test(pw))findings.push('→ Add digits.');
+    if(!/[A-Z]/.test(pw))findings.push('→ Add uppercase letters.');
+    if(!/[^A-Za-z0-9]/.test(pw))findings.push('→ Add symbols (!@#…).');
+  }
+  return {bits,col,w,word,human(seconds),findings};
+}
+const $=id=>document.getElementById(id);
+function update(){
+  const pw=$('pw').value;
+  const r=analyze(pw);
+  $('bar').style.background=r.col;
+  $('bar').style.width=r.w;
+  $('verdict').textContent=pw?r.word+' · ~'+r.bits+' bits':'';
+  $('verdict').style.color=r.col;
+  $('crack').textContent=pw?'Offline brute-force estimate: '+r.crack:'';
+  $('finds').innerHTML=r.findings.map(f=>'<li>'+f+'</li>').join('');
+}
+$('pw').addEventListener('input',update);
+$('show').addEventListener('change',e=>{$('pw').type=e.target.checked?'text':'password';});
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text Repeater — Repeat Text N Times with Separators | ToolForge</title>
+<meta name="description" content="Repeat any text or emoji a chosen number of times, with custom separators and optional numbering. Free browser tool — no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/text-repeater/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Text Repeater","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=text],input[type=number],textarea{width:100%;font-size:1rem;border-radius:10px;padding:11px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  textarea{min-height:170px;resize:vertical;margin-top:12px;font-family:inherit}
+  label{color:var(--mut);font-size:.88rem;display:block;margin:12px 0 4px}
+  .opts{display:flex;gap:16px;flex-wrap:wrap}
+  input[type=number]{width:120px}
+  select{width:auto;font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:14px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #msg{margin-left:8px;color:var(--ok)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Text Repeater</span></header>
+  <p><span class="badge">Up to ×1000</span><span class="badge">Custom separators</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Text Repeater</h1>
+  <p class="sub">Repeat text or emoji as many times as you need — for testing, filler content, chat spam (the fun kind) and templates.</p>
+
+  <div class="card">
+    <label>Text to repeat:</label>
+    <input type="text" id="in" placeholder='e.g. "🔥 " or a sentence'>
+    <label>Repeat count:</label>
+    <input type="number" id="count" value="10" min="1" max="1000">
+    <div class="opts">
+      <div style="flex:1;min-width:200px"><label>Separator between repeats:</label>
+        <select id="sep"><option value="space">Space</option><option value="newline">New line</option><option value="none">Nothing</option><option value="comma">Comma + space</option><option value="custom">Custom…</option></select></div>
+      <div id="custWrap" style="display:none;flex:1;min-width:200px"><label>Custom separator text:</label><input type="text" id="cust" placeholder=", "></div>
+    </div>
+    <label><input type="checkbox" id="numbering" style="width:auto"> Number each repetition (1. … 2. …)</label>
+    <br>
+    <button onclick="gen()">Generate</button>
+    <button class="ghost" onclick="copyOut()">Copy result</button>
+    <button class="ghost" onclick="clearAll()">Clear</button>
+    <span id="msg"></span>
+    <textarea id="out" readonly placeholder="Result appears here…"></textarea>
+  </div>
+
+  <p class="muted" style="margin-top:-6px">Part of ToolForge — free browser tools. Runs entirely in your browser.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function gen(){
+  const src=$('in').value;
+  const n=Math.max(1,Math.min(1000,parseInt($('count').value||'1',10)));
+  let sep=$('sep').value;
+  sep=sep==='space'?' ':sep==='newline'?'\n':sep==='comma'?', ':sep==='custom'?$('cust').value:' ';
+  if(!src){$('msg').textContent='⚠ Enter some text first';return;}
+  $('msg').textContent='';
+  let parts=[];
+  for(let i=0;i<n;i++)parts.push($('numbering').checked?(i+1)+'. '+src:src);
+  const out=parts.join(sep);
+  $('out').value=out.length>500000?out.slice(0,500000)+'… (truncated display — full text still copied)':out;
+  $('msg').textContent='✓ '+n+' repetitions · '+out.length.toLocaleString()+' characters';
+}
+async function copyOut(){
+  if(!$('out').value)gen();
+  try{await navigator.clipboard.writeText($('out').value);$('msg').textContent='✓ Copied';}catch(e){}
+}
+function clearAll(){$('in').value='';$('out').value='';$('msg').textContent='';}
+$('sep').addEventListener('change',()=>{$('custWrap').style.display=$('sep').value==='custom'?'block':'none';});
+['in','count','cust','numbering'].forEach(id=>$(id).addEventListener('input',gen));
+gen();
+</script>
+</body>
+</html>

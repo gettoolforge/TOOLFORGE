@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Character Counter with Limits — Twitter/X, Meta & More | ToolForge</title>
+<meta name="description" content="Free character counter with platform limits: X/Twitter 280, Instagram, meta descriptions, SMS segments and more. Live as you type — private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/character-limits/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Character Counter with Limits","applicationCategory":"WritingApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--warn:#fbbf24;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  textarea{width:100%;min-height:170px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:15px/1.6 system-ui,sans-serif;resize:vertical}
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .stat{background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:10px 16px;text-align:center;flex:1;min-width:120px}
+  .stat b{display:block;color:var(--ok)}
+  .stat span{color:var(--mut);font-size:.8rem}
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.92rem}
+  th,td{padding:7px 9px;border-bottom:1px solid #232a38;text-align:right;font-variant-numeric:tabular-nums}
+  th{text-align:right;color:var(--mut)}th:first-child,td:first-child{text-align:left}
+  td.fit-ok{color:var(--ok)}td.fit-no{color:var(--err)}
+  h2{margin-top:26px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Character Limits</span></header>
+  <p><span class="badge">Platform limits built in</span><span class="badge">Live as you type</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Character Counter with Platform Limits</h1>
+  <p class="sub">Type or paste text — instantly see if it fits X/Twitter, meta descriptions, SMS and more.</p>
+
+  <div class="card">
+    <textarea id="in" placeholder="Paste your text here…"></textarea>
+    <div class="stats">
+      <div class="stat"><b id="chars">0</b><span>Characters</span></div>
+      <div class="stat"><b id="words">0</b><span>Words</span></div>
+      <div class="stat"><b id="nospace">0</b><span>Chars (no spaces)</span></div>
+      <div class="stat"><b id="lines">0</b><span>Lines</span></div>
+    </div>
+    <table>
+      <thead><tr><th>Platform / use</th><th>Limit</th><th>Fits?</th></tr></thead>
+      <tbody id="limits"></tbody>
+    </table>
+  </div>
+
+  <h2>Limit notes (2026)</h2>
+  <ul>
+    <li>X/Twitter counts most URLs as 23 characters regardless of length, and CJK characters as 2 units — this counter shows raw characters.</li>
+    <li>Meta description limit is what Google typically displays (~155–160 chars); longer ones get truncated, not penalized.</li>
+    <li>SMS single segment = 160 chars (or 70 for non-GSM scripts like Finnish ä/ö… actually GSM 03.38 includes them; non-Latin scripts drop to 70).</li>
+    <li>Limits change over time — treat these as the widely-used current values.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const LIMITS=[
+ ['X / Twitter post',280],
+ ['SEO title tag',60],
+ ['Meta description',158],
+ ['Instagram caption',2200],
+ ['LinkedIn post',3000],
+ ['SMS (single segment)',160],
+ ['YouTube title',100],
+ ['Pinterest pin description',500],
+ ['Email subject line',78]
+];
+const $=id=>document.getElementById(id);
+function calc(){
+  const t=$('in').value;
+  $('chars').textContent=t.length;
+  const trimmed=t.trim();
+  $('words').textContent=trimmed?trimmed.split(/\s+/).length:0;
+  $('nospace').textContent=t.replace(/\s/g,'').length;
+  $('lines').textContent=t?t.split('\n').length:0;
+  $('limits').innerHTML=LIMITS.map(([name,lim])=>{
+    const ok=t.length<=lim;
+    return '<tr><td>'+name+'</td><td>'+lim+'</td><td class="'+(t.length?(ok?'fit-ok':'fit-no'):'')+'">'+(t.length?(ok?'✓ fits ('+(lim-t.length)+' left)':'✗ over by '+(t.length-lim)):'—')+'</td></tr>';
+  }).join('');
+}
+$('in').addEventListener('input',calc);
+calc();
+</script>
+</body>
+</html>

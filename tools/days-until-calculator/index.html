@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Days Until Calculator — Countdown to Any Date | ToolForge</title>
+<meta name="description" content="Free countdown calculator: exactly how many days until any date — birthday, holiday, deadline. Includes weeks and weekend-aware count. No signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/days-until-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Days Until Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0;text-align:center}
+  input[type=date]{font-size:1rem;border-radius:10px;padding:11px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  #big{font-size:3rem;font-weight:800;color:var(--ok);margin:16px 0 4px;min-height:1.3em}
+  #line{color:var(--mut)}
+  #extra{display:none;margin-top:14px;line-height:2}
+  #extra b{color:var(--ok)}
+  h2{margin-top:26px;text-align:left}ul{text-align:left;padding-left:22px}.muted{color:var(--mut)}
+  .quick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .quick button{background:#232a38;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:7px 13px;font-size:.85rem;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Days Until</span></header>
+  <p><span class="badge">Live countdown</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Days Until Calculator</h1>
+  <p class="sub">Pick a date — get the exact countdown in days, weeks and working days.</p>
+
+  <div class="card">
+    <input type="date" id="target">
+    <div id="big"></div>
+    <div id="line"></div>
+    <div id="extra">
+      That's <b id="wks"></b> · <b id="bus"></b> working days (Mon–Fri) ·
+      target falls on a <b id="dow"></b>.
+    </div>
+    <div class="quick">
+      <button data-add="7">+1 week</button><button data-add="30">+30 days</button><button data-add="90">+90 days</button><button data-add="365">+1 year</button>
+    </div>
+  </div>
+
+  <h2>Common uses</h2>
+  <ul>
+    <li>Birthday & holiday countdowns · project deadlines · exam dates · visa/passport expiry tracking · "days since I quit ☕"</li>
+    <li>Past dates work too — it shows days since.</li>
+    <li>The count is calendar-exact including leap years.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function calc(){
+  const t=$('target').value;
+  if(!t){return;}
+  const now=new Date();now.setHours(0,0,0,0);
+  const target=new Date(t+'T00:00:00');
+  if(isNaN(target))return;
+  let days=Math.round((target-now)/86400000);
+  const past=days<0;
+  const abs=Math.abs(days);
+  $('big').textContent=abs.toLocaleString();
+  $('line').textContent=abs===0?'🎯 It\'s TODAY!':(past?'days SINCE '+target.toLocaleDateString(undefined,{dateStyle:'long'}):'days UNTIL '+target.toLocaleDateString(undefined,{dateStyle:'long'}));
+  // weeks + remainder
+  const w=Math.floor(abs/7),r=abs%7;
+  $('wks').textContent=w+' week'+(w===1?'':'s')+(r?' and '+r+' day'+(r===1?'':'s'):'');
+  // business days between now and target
+  let bus=0;
+  const cur=new Date(now);
+  const limit=Math.min(abs,100000);
+  for(let i=0;i<limit;i++){
+    cur.setDate(cur.getDate()+(past?-1:1));
+    const dow=cur.getDay();
+    if(dow!==0&&dow!==6)bus++;
+  }
+  $('bus').textContent=(past?'−':'')+bus.toLocaleString();
+  $('dow').textContent=target.toLocaleDateString(undefined,{weekday:'long'});
+  $('extra').style.display='block';
+}
+$('target').addEventListener('change',calc);
+document.querySelectorAll('.quick button').forEach(b=>b.addEventListener('click',()=>{
+  const d=new Date();d.setDate(d.getDate()+parseInt(b.dataset.add,10));
+  $('target').value=d.toISOString().slice(0,10);
+  calc();
+}));
+$('target').value=todayStr();
+calc();
+setInterval(()=>{if($('target').value)calc();},60000);
+</script>
+</body>
+</html>
