@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base64 Encoder / Decoder — Text & UTF-8 Safe | ToolForge</title>
+<meta name="description" content="Encode text to Base64 or decode Base64 back to text instantly. Full Unicode/UTF-8 support. Free, private, no signup — runs entirely in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/base64-encoder/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Base64 Encoder / Decoder","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1024px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label{font-size:.9rem;color:var(--mut);display:block;margin-bottom:6px}
+  textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin:10px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  #status{margin-left:8px;font-weight:600}
+  .ok{color:var(--ok)}.err{color:var(--err)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Base64 Encoder / Decoder</span></header>
+  <p><span class="badge">UTF-8 safe</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Base64 Encoder / Decoder</h1>
+  <p class="sub">Convert text to Base64 and back — full Unicode support (emoji, Finnish ä/ö, CJK all survive the round trip).</p>
+
+  <div class="card">
+    <label>Input:</label>
+    <textarea id="in" placeholder="Type text to encode, or paste Base64 to decode…"></textarea>
+    <button onclick="doEncode()">Encode →</button>
+    <button onclick="doDecode()">← Decode</button>
+    <button class="ghost" onclick="swapIO()">⇄ Use output as input</button>
+    <button class="ghost" onclick="clearAll()">Clear</button>
+    <span id="status"></span>
+    <br><label style="margin-top:12px">Output:</label>
+    <textarea id="out" readonly placeholder="Result appears here…"></textarea>
+  </div>
+
+  <h2>What is Base64?</h2>
+  <ul>
+    <li>A way to represent binary/text data using only 64 safe characters (<code>A–Z a–z 0–9 + /</code>) so it survives email headers, JSON, URLs and old protocols.</li>
+    <li><strong>It is NOT encryption.</strong> Anyone can decode it — never use Base64 to hide passwords or secrets.</li>
+    <li>Encoded output is ~33% larger than the input.</li>
+    <li>This tool uses the UTF-8-safe method (<code>TextEncoder</code>), so multi-byte characters don't get mangled — a classic bug in naive converters.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const enc=new TextEncoder();
+const dec=new TextDecoder();
+function b64encode(str){
+  const bytes=enc.encode(str);
+  let bin='';
+  for(const b of bytes)bin+=String.fromCharCode(b);
+  return btoa(bin);
+}
+function b64decode(b64){
+  // tolerate URL-safe variants and missing padding
+  let s=b64.trim().replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  const bin=atob(s);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return dec.decode(bytes);
+}
+function doEncode(){
+  const src=document.getElementById('in').value;
+  const st=document.getElementById('status');
+  if(!src){st.className='err';st.textContent='⚠ Nothing to encode';return;}
+  document.getElementById('out').value=b64encode(src);
+  st.className='ok';st.textContent='✓ Encoded';
+}
+function doDecode(){
+  const src=document.getElementById('in').value;
+  const st=document.getElementById('status');
+  if(!src){st.className='err';st.textContent='⚠ Nothing to decode';return;}
+  try{
+    document.getElementById('out').value=b64decode(src);
+    st.className='ok';st.textContent='✓ Decoded';
+  }catch(e){
+    st.className='err';st.textContent='✗ Not valid Base64';
+  }
+}
+function swapIO(){
+  document.getElementById('in').value=document.getElementById('out').value;
+  document.getElementById('out').value='';
+  document.getElementById('status').textContent='';
+}
+function clearAll(){
+  document.getElementById('in').value='';
+  document.getElementById('out').value='';
+  document.getElementById('status').textContent='';
+}
+</script>
+</body>
+</html>

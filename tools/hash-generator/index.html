@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hash Generator — SHA-256, SHA-512 & More | ToolForge</title>
+<meta name="description" content="Generate SHA-1, SHA-256, SHA-384 and SHA-512 hashes from any text instantly. Free, private, no signup — runs entirely in your browser via the Web Crypto API.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/hash-generator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Hash Generator","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1024px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  textarea{width:100%;min-height:120px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin:10px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  .hashrow{margin-top:14px}
+  .hashrow .alg{font-size:.85rem;color:var(--acc);font-weight:700;margin-bottom:3px}
+  .hashval{font:13px/1.5 ui-monospace,Consolas,monospace;background:#0c0e13;border:1px solid #2b3342;border-radius:8px;padding:9px 11px;word-break:break-all;cursor:pointer;color:#cdd6f4}
+  .hashval:hover{border-color:var(--acc)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Hash Generator</span></header>
+  <p><span class="badge">Web Crypto API</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Hash Generator</h1>
+  <p class="sub">SHA-256 / SHA-384 / SHA-512 fingerprints of any text — computed locally with your browser's native crypto engine.</p>
+
+  <div class="card">
+    <textarea id="in" placeholder="Paste text to hash…"></textarea>
+    <button onclick="run()">Hash it</button>
+    <button class="ghost" onclick="clearAll()">Clear</button>
+    <div id="out"></div>
+  </div>
+
+  <h2>Which hash for what?</h2>
+  <ul>
+    <li><strong>SHA-256</strong> — today's default for file integrity, signatures, blockchains.</li>
+    <li><strong>SHA-512</strong> — same family, longer digest; fine anywhere a long fingerprint helps.</li>
+    <li><strong>SHA-1</strong> — legacy only; broken for security purposes since 2017 (kept here because some old systems still ask for it).</li>
+    <li>A hash is one-way: you can't recover the text from it. Identical text always yields an identical hash — that's how integrity checks work.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+async function sha(algo,text){
+  const data=new TextEncoder().encode(text);
+  const buf=await crypto.subtle.digest(algo,data);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function run(){
+  const src=document.getElementById('in').value;
+  const out=document.getElementById('out');
+  if(!src){out.innerHTML='';return;}
+  const algos=[['SHA-1','sha1'],['SHA-256','sha256'],['SHA-384','sha384'],['SHA-512','sha512']];
+  let html='';
+  for(const [algo,id] of algos){
+    const h=await sha(algo,src);
+    html+='<div class="hashrow"><div class="alg">'+algo+'</div><div class="hashval" id="'+id+'" title="Click to copy" onclick="copyV(\''+id+'\')">'+h+'</div></div>';
+  }
+  out.innerHTML=html;
+}
+async function copyV(id){
+  try{await navigator.clipboard.writeText(document.getElementById(id).textContent);}catch(e){}
+}
+function clearAll(){document.getElementById('in').value='';document.getElementById('out').innerHTML='';}
+</script>
+</body>
+</html>

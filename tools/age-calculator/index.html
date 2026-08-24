@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age Calculator — Exact Age in Years, Months & Days | ToolForge</title>
+<meta name="description" content="Calculate exact age from a birthdate: years, months, days, total days lived and next birthday countdown. Free, private, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/age-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Age Calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input[type=date],input[type=number],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:10px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #res{margin-top:14px;display:none;line-height:1.9}
+  #res b{color:var(--ok)}
+  .big{font-size:1.35rem;font-weight:700;color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Age Calculator</span></header>
+  <p><span class="badge">Exact calendar math</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Age Calculator</h1>
+  <p class="sub">Real calendar-correct age — not just days ÷ 365. Handles leap years and month lengths properly.</p>
+
+  <div class="card">
+    <label>Date of birth:</label><br>
+    <input type="date" id="dob">
+    <label style="margin-left:14px">Age at date (default today):</label>
+    <input type="date" id="at">
+    <button onclick="calc()">Calculate</button>
+    <button class="ghost" onclick="document.getElementById('res').style.display='none';document.getElementById('err').textContent=''">Clear</button>
+    <div id="err" style="color:#f87171;min-height:1.4em;margin-top:6px"></div>
+    <div id="res"></div>
+  </div>
+
+  <h2>Why "days ÷ 365" is wrong</h2>
+  <ul>
+    <li>Leap years add a day roughly every 4 years — dividing by 365 drifts your age by weeks over a lifetime.</li>
+    <li>Months have 28–31 days, so "0.5 years" isn't a fixed number of months. This tool walks the actual calendar.</li>
+    <li>Legal ages (voting, retirement, contracts) are always defined in calendar terms — this matches how officials count.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function calc(){
+  const err=document.getElementById('err');
+  const res=document.getElementById('res');
+  const dobV=document.getElementById('dob').value;
+  if(!dobV){err.textContent='⚠ Pick a date of birth';return;}
+  const atV=document.getElementById('at').value||new Date().toISOString().slice(0,10);
+  const dob=new Date(dobV+'T00:00:00');
+  const at=new Date(atV+'T00:00:00');
+  if(isNaN(dob)||isNaN(at)){err.textContent='⚠ Invalid date';return;}
+  if(dob>at){err.textContent='⚠ Birth date must be before the target date';return;}
+  err.textContent='';
+  // calendar-exact y/m/d
+  let y=at.getFullYear()-dob.getFullYear();
+  let m=at.getMonth()-dob.getMonth();
+  let d=at.getDate()-dob.getDate();
+  if(d<0){m--;d+=new Date(at.getFullYear(),at.getMonth(),0).getDate();}
+  if(m<0){y--;m+=12;}
+  // totals
+  const totalDays=Math.floor((at-dob)/86400000);
+  // next birthday (relative to `at`)
+  let nb=new Date(at.getFullYear(),dob.getMonth(),dob.getDate());
+  if(nb<=at)nb=new Date(at.getFullYear()+1,dob.getMonth(),dob.getDate());
+  const daysToBd=Math.ceil((nb-at)/86400000);
+  res.innerHTML=
+    '<span class="big">'+y+' years, '+m+' months, '+d+' days</span><br>'+
+    'Total: <b>'+totalDays.toLocaleString()+'</b> days · ~<b>'+Math.floor(totalDays/7).toLocaleString()+'</b> weeks · ~<b>'+(totalDays/365.25).toFixed(1)+'</b> years<br>'+
+    'Born on a <b>'+dob.toLocaleDateString(undefined,{weekday:'long'})+'</b>'+
+    ' · Next birthday in <b>'+daysToBd+'</b> day'+(daysToBd===1?'':'s')+' ('+nb.toLocaleDateString(undefined,{dateStyle:'long'})+')';
+  res.style.display='block';
+}
+document.getElementById('at').value=new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
