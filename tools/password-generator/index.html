@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Password Generator — Strong, Random, Secure | ToolForge</title>
+<meta name="description" content="Generate strong random passwords instantly: custom length, symbols, numbers. Cryptographically secure, strength meter, nothing leaves your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/password-generator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Password Generator","applicationCategory":"SecurityApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0;transition:border-color .15s ease}
+  .card:hover{border-color:#33405c}
+  input[type=text],button,select{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin:12px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  input[type=text]{width:min(100%,520px);font-family:ui-monospace,Consolas,monospace}
+  label{margin-right:16px;cursor:pointer}
+  input[type=range]{width:200px;vertical-align:middle}
+  #lenVal{font-weight:700;color:var(--acc)}
+  .meter{height:8px;border-radius:99px;background:#232a38;margin-top:14px;overflow:hidden}
+  .meter i{display:block;height:100%;width:0;transition:all .2s ease;border-radius:99px}
+  #verdict{font-weight:600;margin-top:6px}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Password Generator</span></header>
+  <p><span class="badge">Crypto-secure RNG</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Password Generator</h1>
+  <p class="sub">Strong random passwords from your browser's cryptographic RNG — generated locally, never transmitted.</p>
+
+  <div class="card">
+    <input type="text" id="out" readonly aria-label="Generated password">
+    <button onclick="gen()">Generate</button>
+    <button class="ghost" onclick="copyPw()">Copy</button>
+    <div class="meter"><i id="bar"></i></div>
+    <div id="verdict"></div>
+    <br><br>
+    <label>Length: <input type="range" id="len" min="6" max="64" value="16" oninput="document.getElementById('lenVal').textContent=this.value;gen()"> <b id="lenVal">16</b></label><br><br>
+    <label><input type="checkbox" id="lower" checked style="width:auto"> abc</label>
+    <label><input type="checkbox" id="upper" checked style="width:auto"> ABC</label>
+    <label><input type="checkbox" id="nums" checked style="width:auto"> 123</label>
+    <label><input type="checkbox" id="syms" checked style="width:auto"> #$&amp;</label>
+    <label><input type="checkbox" id="ambig" style="width:auto"> Exclude look-alikes (0/O, 1/l/I)</label>
+  </div>
+
+  <h2>How strong is “strong”?</h2>
+  <ul>
+    <li>Strength comes from <strong>length × variety</strong>. A 16-character mix of all sets ≈ 100+ bits of entropy — beyond any realistic brute-force.</li>
+    <li>This generator uses <code>crypto.getRandomValues()</code>: the same OS-level randomness banks use, not predictable math functions.</li>
+    <li><strong>Nothing is sent anywhere.</strong> The password exists only on your screen until you copy it.</li>
+    <li>Tip: a different password per site matters more than one perfect password everywhere — one breach shouldn't open every door.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const SETS={lower:'abcdefghijklmnopqrstuvwxyz',upper:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',nums:'0123456789',syms:'!@#$%^&*()-_=+[]{};:,.<>?/'};
+const AMBIG=/[0O1lI|`'"S5B8]/g;
+function gen(){
+  const len=parseInt(document.getElementById('len').value,10);
+  let pool='';
+  for(const k of ['lower','upper','nums','syms'])if(document.getElementById(k).checked)pool+=SETS[k];
+  if(document.getElementById('ambig').checked)pool=pool.replace(AMBIG,'');
+  const out=document.getElementById('out');
+  if(!pool){out.value='⚠ Select at least one character set';updateMeter('');return;}
+  const vals=new Uint32Array(len);
+  crypto.getRandomValues(vals);
+  out.value=[...vals].map(v=>pool[v%pool.length]).join('');
+  updateMeter(out.value);
+}
+function bits(pw,poolSize){
+  // entropy estimate = length * log2(pool), penalize short heavily
+  return Math.round(pw.length*Math.log2(Math.max(2,poolSize)));
+}
+let lastPool='';
+function updateMeter(pw){
+  const bar=document.getElementById('bar'),v=document.getElementById('verdict');
+  if(!pw){bar.style.width='0';v.textContent='';return;}
+  const b=bits(pw,lastPool||70);
+  let col,w,label;
+  if(b<40){col='#f87171';w='25%';label='Weak — fine for a throwaway, not for money or email';}
+  else if(b<60){col='#fbbf24';w='50%';label='Okay — acceptable for low-stakes accounts';}
+  else if(b<80){col='#34d399';w='75%';label='Strong';}
+  else{col='#22d3ee';w='100%';label='Very strong — brute-forcing this would outlive the universe';}
+  bar.style.background=col;bar.style.width=w;
+  v.style.color=col;v.textContent=label+' · ~'+b+' bits of entropy';
+}
+async function copyPw(){
+  const o=document.getElementById('out').value;
+  if(o){try{await navigator.clipboard.writeText(o);}catch(e){}}
+}
+['lower','upper','nums','syms','ambig'].forEach(id=>document.getElementById(id).addEventListener('change',gen));
+// init pool size display
+const _origGen=gen;
+gen();
+</script>
+</body>
+</html>

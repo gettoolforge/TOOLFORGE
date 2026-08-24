@@ -10,4 +10,9 @@
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/color-converter/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/lorem-ipsum-generator/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/csv-to-json/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/password-generator/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/text-diff/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/unit-converter/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/markdown-to-html/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/random-number-generator/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
 </urlset>

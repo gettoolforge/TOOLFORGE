@@ -4,20 +4,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ToolForge — Free Browser Tools. Private. No Signup.</title>
-<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
 <meta name="description" content="Free online tools that run entirely in your browser: converters, generators, calculators. No upload, no signup, no watermark. Your data never leaves your device.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff}
   *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-  main{max-width:880px;margin:0 auto;padding:24px 20px 64px}
-  h1{font-size:2rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0;font-size:1.05rem}
+  main{max-width:960px;margin:0 auto;padding:24px 20px 64px}
+  h1{font-size:2rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--mut);margin-top:0;font-size:1.05rem}
   a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:22px}
+  /* ---- finder ---- */
+  .finder{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 82%,transparent);padding:10px 0;margin:-10px 0 0}
+  .search{width:100%;padding:13px 18px;font-size:1.05rem;border-radius:12px;border:1px solid #2b3342;background:#171a21;color:var(--text);outline:none}
+  .search:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,140,255,.15)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chip{background:#1d2534;border:1px solid #262c38;color:var(--mut);border-radius:999px;padding:5px 14px;font-size:.85rem;cursor:pointer}
+  .chip:hover{color:var(--text)}
+  .chip.active{background:#1d2534;border-color:var(--acc);color:var(--acc)}
+  #count{font-size:.85rem;color:var(--mut);margin-top:10px;display:block}
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:14px}
   .tool{transition:all .15s ease;background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;display:block;color:var(--text)}
   .tool:hover{border-color:var(--acc);text-decoration:none;transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,140,255,.18)}
   .tool h3{margin:0 0 6px}.tool p{margin:0;color:var(--mut);font-size:.92rem}
-  .pill{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.78rem;margin-bottom:10px}
+  .pill{display:inline-block;border-radius:999px;padding:2px 12px;font-size:.78rem;margin-bottom:10px}
+  .c-video{background:rgba(245,158,11,.13);color:#f59e0b}
+  .c-writing{background:rgba(52,211,153,.13);color:#34d399}
+  .c-dev{background:rgba(79,140,255,.13);color:#4f8cff}
+  .c-design{background:rgba(251,113,133,.13);color:#fb7185}
+  .c-data{background:rgba(45,212,191,.13);color:#2dd4bf}
+  .c-calc{background:rgba(167,139,250,.13);color:#a78bfa}
+  #empty{display:none;text-align:center;color:var(--mut);padding:40px 0}
+  ul{padding-left:22px}.muted{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -25,54 +44,94 @@
   <h1>⚙️ ToolForge</h1>
   <p class="sub">Free tools that run <strong>100% in your browser</strong>. No uploads, no accounts, no watermarks — your files never leave your device.</p>
 
-  <div class="grid">
-    <a class="tool" href="tools/srt-to-vtt/">
-      <span class="pill" style="background:#f59e0b22;color:#f59e0b">Video · Subtitles</span>
+  <div class="finder">
+    <input class="search" id="q" type="search" placeholder="🔍 Search tools… try “json”, “counter”, “convert”" aria-label="Search tools">
+    <div class="chips" id="chips">
+      <button class="chip active" data-cat="all">All</button>
+      <button class="chip" data-cat="video">🎬 Video</button>
+      <button class="chip" data-cat="writing">✍️ Writing</button>
+      <button class="chip" data-cat="dev">💻 Developer</button>
+      <button class="chip" data-cat="design">🎨 Design</button>
+      <button class="chip" data-cat="data">📊 Data</button>
+      <button class="chip" data-cat="calc">🧮 Calculators</button>
+    </div>
+    <span id="count"></span>
+  </div>
+
+  <div class="grid" id="grid">
+    <a class="tool" data-cat="video" data-kw="srt vtt subtitle captions convert webvtt subrip video" href="tools/srt-to-vtt/">
+      <span class="pill c-video">Video · Subtitles</span>
       <h3>SRT → VTT Converter</h3>
       <p>Convert SubRip to WebVTT (and back) instantly. Auto-detects format, merges rolling captions.</p>
     </a>
-    <a class="tool" href="tools/word-counter/">
-      <span class="pill" style="background:#34d39922;color:#34d399">Writing · Students</span>
+    <a class="tool" data-cat="writing" data-kw="word count characters sentences paragraphs reading time essay writing" href="tools/word-counter/">
+      <span class="pill c-writing">Writing · Students</span>
       <h3>Word Counter</h3>
       <p>Live count of words, characters, sentences and paragraphs as you type. Reading time included.</p>
     </a>
-    <a class="tool" href="tools/json-formatter/">
-      <span class="pill" style="background:#4f8cff22;color:#4f8cff">Developer</span>
+    <a class="tool" data-cat="dev" data-kw="json format beautify minify validate pretty parser developer" href="tools/json-formatter/">
+      <span class="pill c-dev">Developer</span>
       <h3>JSON Formatter & Validator</h3>
       <p>Beautify, minify and validate JSON with precise error messages. Nothing leaves your machine.</p>
     </a>
-    <a class="tool" href="tools/case-converter/">
-      <span class="pill" style="background:#a78bfa22;color:#a78bfa">Text · Developer</span>
+    <a class="tool" data-cat="writing" data-kw="uppercase lowercase title camelcase pascal snake sentence text case" href="tools/case-converter/">
+      <span class="pill c-writing">Text · Developer</span>
       <h3>Case Converter</h3>
       <p>UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_case — one click each.</p>
     </a>
-    <a class="tool" href="tools/timestamp-converter/">
-      <span class="pill" style="background:#38bdf822;color:#38bdf8">Developer · IT</span>
+    <a class="tool" data-cat="dev" data-kw="unix epoch timestamp date time seconds milliseconds utc iso" href="tools/timestamp-converter/">
+      <span class="pill c-dev">Developer · IT</span>
       <h3>Unix Timestamp Converter</h3>
       <p>Epoch seconds/milliseconds ↔ human dates, auto-detected. Live current timestamp, ISO 8601 output.</p>
     </a>
-    <a class="tool" href="tools/uuid-generator/">
-      <span class="pill" style="background:#4f8cff22;color:#4f8cff">Developer</span>
+    <a class="tool" data-cat="dev" data-kw="uuid guid unique identifier random id v4 bulk" href="tools/uuid-generator/">
+      <span class="pill c-dev">Developer</span>
       <h3>UUID Generator</h3>
       <p>Crypto-secure v4 UUIDs/GUIDs — one or bulk up to 500, upper/lowercase, download as .txt.</p>
     </a>
-    <a class="tool" href="tools/color-converter/">
-      <span class="pill" style="background:#fb718522;color:#fb7185">Design</span>
+    <a class="tool" data-cat="design" data-kw="hex rgb hsl color convert picker palette css" href="tools/color-converter/">
+      <span class="pill c-design">Design</span>
       <h3>Color Converter</h3>
       <p>HEX ⇄ RGB ⇄ HSL with live preview and one-click copy for every format.</p>
     </a>
-    <a class="tool" href="tools/lorem-ipsum-generator/">
-      <span class="pill">Design · Writing</span>
+    <a class="tool" data-cat="design" data-kw="lorem ipsum placeholder filler dummy text mockup" href="tools/lorem-ipsum-generator/">
+      <span class="pill c-design">Design · Writing</span>
       <h3>Lorem Ipsum Generator</h3>
       <p>Placeholder text by paragraphs, sentences or words — varied so it never looks copy-pasted.</p>
     </a>
-    <a class="tool" href="tools/csv-to-json/">
-      <span class="pill" style="background:#2dd4bf22;color:#2dd4bf">Data · Developer</span>
+    <a class="tool" data-cat="data" data-kw="csv json convert spreadsheet excel parse data" href="tools/csv-to-json/">
+      <span class="pill c-data">Data · Developer</span>
       <h3>CSV to JSON Converter</h3>
       <p>Quote-aware CSV parsing with smart number/boolean typing. Your data never leaves your machine.</p>
     </a>
+    <a class="tool" data-cat="dev" data-kw="password secure random generator passphrase safety strength" href="tools/password-generator/">
+      <span class="pill c-dev">Security · Developer</span>
+      <h3>Password Generator</h3>
+      <p>Strong crypto-secure passwords: custom length, symbols, look-alike exclusion, strength meter.</p>
+    </a>
+    <a class="tool" data-cat="writing" data-kw="diff compare changes versions text files lines added removed git" href="tools/text-diff/">
+      <span class="pill c-writing">Text · Developer</span>
+      <h3>Text Diff Checker</h3>
+      <p>Compare two texts line by line — additions and removals highlighted like a code diff.</p>
+    </a>
+    <a class="tool" data-cat="calc" data-kw="unit convert length weight temperature metric imperial km miles kg pounds celsius fahrenheit data size" href="tools/unit-converter/">
+      <span class="pill c-calc">Calculators</span>
+      <h3>Unit Converter</h3>
+      <p>Length, weight, temperature, area, volume, speed and data units — precise instant conversion.</p>
+    </a>
+    <a class="tool" data-cat="dev" data-kw="markdown html convert md preview readme blog formatting" href="tools/markdown-to-html/">
+      <span class="pill c-dev">Developer · Writing</span>
+      <h3>Markdown → HTML</h3>
+      <p>Convert Markdown to clean HTML as you type — headings, lists, links, code, quotes.</p>
+    </a>
+    <a class="tool" data-cat="calc" data-kw="random number dice raffle lottery draw pick rng range" href="tools/random-number-generator/">
+      <span class="pill c-calc">Calculators</span>
+      <h3>Random Number Generator</h3>
+      <p>Fair random picks in any range — draws, dice and sampling with optional no-repeats.</p>
+    </a>
     <!-- AGENTS: add new tool cards here -->
   </div>
+  <div id="empty">😕 No tools match. Try another word.</div>
 
   <h2>Why ToolForge?</h2>
   <ul>
@@ -83,5 +142,34 @@
 
   <p style="margin-top:40px;color:var(--mut);font-size:.9rem">© 2026 ToolForge · Built for speed and privacy.</p>
 </main>
+<script>
+const q=document.getElementById('q');
+const cards=[...document.querySelectorAll('#grid .tool')];
+let activeCat='all';
+function apply(){
+  const needle=q.value.trim().toLowerCase();
+  let shown=0;
+  for(const c of cards){
+    const okCat=(activeCat==='all'||c.dataset.cat===activeCat);
+    const hay=(c.textContent+' '+(c.dataset.kw||'')).toLowerCase();
+    const okQ=!needle||hay.includes(needle);
+    const show=okCat&&okQ;
+    c.style.display=show?'':'none';
+    if(show)shown++;
+  }
+  document.getElementById('empty').style.display=shown?'none':'block';
+  document.getElementById('count').textContent=shown+' of '+cards.length+' tools';
+}
+q.addEventListener('input',apply);
+document.getElementById('chips').addEventListener('click',e=>{
+  const b=e.target.closest('.chip');
+  if(!b)return;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  b.classList.add('active');
+  activeCat=b.dataset.cat;
+  apply();
+});
+apply();
+</script>
 </body>
 </html>

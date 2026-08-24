@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text Diff Checker — Compare Two Texts, Highlight Changes | ToolForge</title>
+<meta name="description" content="Compare two texts or code snippets side by side and highlight added and removed lines instantly. Free, private, no signup — runs in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/text-diff/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Text Diff Checker","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1100px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.cols{grid-template-columns:1fr}}
+  label{font-size:.9rem;color:var(--mut);display:block;margin-bottom:6px}
+  textarea{width:100%;min-height:180px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:10px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #stats{margin-left:10px;color:var(--mut)}
+  #res{margin-top:14px;display:none;font:14px/1.7 ui-monospace,Consolas,monospace;background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;overflow:auto;max-height:480px;white-space:pre-wrap;word-break:break-word}
+  .add{background:rgba(52,211,153,.15);color:#6ee7b7;display:block;border-left:3px solid #34d399;padding:0 6px}
+  .del{background:rgba(248,113,113,.15);color:#fca5a5;display:block;border-left:3px solid #f87171;padding:0 6px;text-decoration:line-through}
+  .same{display:block;padding:0 6px;color:var(--mut)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Text Diff</span></header>
+  <p><span class="badge">Line-by-line diff</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Text Diff Checker</h1>
+  <p class="sub">Paste two versions — see exactly which lines were added, removed, or kept. Great for config files, drafts, logs and code.</p>
+
+  <div class="card">
+    <div class="cols">
+      <div><label>Original (A)</label><textarea id="a" placeholder="Original text…"></textarea></div>
+      <div><label>Changed (B)</label><textarea id="b" placeholder="Changed text…"></textarea></div>
+    </div>
+    <label style="margin-top:10px"><input type="checkbox" id="trim" checked style="width:auto"> Ignore leading/trailing whitespace per line</label><br>
+    <button onclick="run()">Compare</button>
+    <button class="ghost" onclick="clearAll()">Clear both</button>
+    <span id="stats"></span>
+    <div id="res"></div>
+  </div>
+
+  <h2>Reading the result</h2>
+  <ul>
+    <li><span style="color:#6ee7b7">Green lines</span> exist only in B (added).</li>
+    <li><span style="color:#fca5a5">Red struck-through lines</span> existed only in A (removed).</li>
+    <li>Gray lines are identical in both.</li>
+    <li>This is a line-level LCS (longest common subsequence) diff — the same core algorithm behind git diff.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function norm(s){
+  const trim=document.getElementById('trim').checked;
+  return s.replace(/\r/g,'').split('\n').map(l=>trim?l.trim():l);
+}
+// classic LCS-based line diff
+function diffLines(A,B){
+  const n=A.length,m=B.length;
+  const dp=Array.from({length:n+1},()=>new Uint32Array(m+1));
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)
+    dp[i][j]=A[i]===B[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+  const ops=[];let i=0,j=0;
+  while(i<n&&j<m){
+    if(A[i]===B[j]){ops.push(['=',A[i]]);i++;j++;}
+    else if(dp[i+1][j]>=dp[i][j+1]){ops.push(['-',A[i]]);i++;}
+    else{ops.push(['+',B[j]]);j++;}
+  }
+  while(i<n){ops.push(['-',A[i]]);i++;}
+  while(j<m){ops.push(['+',B[j]]);j++;}
+  return ops;
+}
+function run(){
+  const A=norm(document.getElementById('a').value);
+  const B=norm(document.getElementById('b').value);
+  const res=document.getElementById('res');
+  const stats=document.getElementById('stats');
+  if(!document.getElementById('a').value&&!document.getElementById('b').value){stats.textContent='⚠ Paste something in at least one box';return;}
+  const ops=diffLines(A,B);
+  const adds=ops.filter(o=>o[0]==='+').length,dels=ops.filter(o=>o[0]==='-').length;
+  stats.textContent='+ '+adds+' added · − '+dels+' removed · '+ops.filter(o=>o[0]==='=').length+' unchanged';
+  res.innerHTML=ops.map(([t,l])=>{
+    const esc=l.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return t==='='?'<span class=same>  '+esc+'</span>':t==='+'?'<span class=add>+ '+esc+'</span>':'<span class=del>− '+esc+'</span>';
+  }).join('');
+  res.style.display='block';
+}
+function clearAll(){document.getElementById('a').value='';document.getElementById('b').value='';document.getElementById('res').style.display='none';document.getElementById('stats').textContent='';}
+</script>
+</body>
+</html>

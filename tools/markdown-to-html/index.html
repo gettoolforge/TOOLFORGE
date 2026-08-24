@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown to HTML Converter — Live Preview | ToolForge</title>
+<meta name="description" content="Convert Markdown to clean HTML instantly with a live preview. Headings, bold, italic, lists, links, code and blockquotes supported. Free, private, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/markdown-to-html/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Markdown to HTML Converter","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1100px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.cols{grid-template-columns:1fr}}
+  label{font-size:.9rem;color:var(--mut);display:block;margin-bottom:6px}
+  textarea{width:100%;min-height:300px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;resize:vertical}
+  #htmlOut{width:100%;min-height:300px;background:#0c0e13;color:#9ecbff;border:1px solid #2b3342;border-radius:10px;padding:12px;font:14px/1.5 ui-monospace,Consolas,monospace;overflow:auto}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:10px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Markdown → HTML</span></header>
+  <p><span class="badge">Live conversion</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Markdown to HTML Converter</h1>
+  <p class="sub">Type or paste Markdown on the left — get clean HTML on the right as you type.</p>
+
+  <div class="card">
+    <div class="cols">
+      <div><label>Markdown:</label><textarea id="in" placeholder="# Heading&#10;&#10;Some **bold** and *italic* text with a [link](https://example.com).&#10;&#10;- list item&#10;- another item&#10;&#10;&gt; a quote&#10;&#10;`inline code`"></textarea></div>
+      <div><label>HTML output:</label><pre id="htmlOut" contenteditable="false"></pre></div>
+    </div>
+    <button onclick="copyHtml()">Copy HTML</button>
+    <button class="ghost" onclick="downloadHtml()">Download .html</button>
+    <button class="ghost" onclick="document.getElementById('in').value='';conv();">Clear</button>
+  </div>
+
+  <h2>Supported syntax</h2>
+  <ul>
+    <li>Headings <code>#</code> through <code>######</code></li>
+    <li><strong>**bold**</strong>, *italic*, `inline code`</li>
+    <li>[links](https://…) and ![images](url)</li>
+    <li>Bullet lists (<code>- item</code>) and numbered lists (<code>1. item</code>)</li>
+    <li>Blockquotes (<code>&gt; text</code>), horizontal rules (<code>---</code>)</li>
+    <li>Paragraphs from blank lines</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function inline(s){
+  s=esc(s);
+  s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+  s=s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g,'<img src="$2" alt="$1">');
+  s=s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2">$1</a>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  return s;
+}
+function md2html(src){
+  const lines=src.replace(/\r/g,'').split('\n');
+  const out=[];
+  let inUl=false,inOl=false,inQuote=false;
+  const closeLists=()=>{
+    if(inUl){out.push('</ul>');inUl=false;}
+    if(inOl){out.push('</ol>');inOl=false;}
+    if(inQuote){out.push('</blockquote>');inQuote=false;}
+  };
+  for(const line of lines){
+    let l=line;
+    const h=l.match(/^(#{1,6})\s+(.*)$/);
+    if(h){closeLists();const n=h[1].length;out.push('<h'+n+'>'+inline(h[2].trim())+'</h'+n+'>');continue;}
+    if(/^\s*(---+|\*\*\*+)\s*$/.test(l)){closeLists();out.push('<hr>');continue;}
+    const q=l.match(/^&?\s*&gt;\s?(.*)$/)||l.match(/^>\s?(.*)$/);
+    if(q){if(!inQuote){closeLists();out.push('<blockquote>');inQuote=true;}out.push(inline(q[1]));continue;}
+    if(inQuote&&!q)closeLists();
+    const ul=l.match(/^\s*[-*+]\s+(.*)$/);
+    if(ul){if(inOl){out.push('</ol>');inOl=false;}if(!inUl){out.push('<ul>');inUl=true;}out.push('<li>'+inline(ul[1])+'</li>');continue;}
+    const ol=l.match(/^\s*\d+[.)]\s+(.*)$/);
+    if(ol){if(inUl){out.push('</ul>');inUl=false;}if(!inOl){out.push('<ol>');inOl=true;}out.push('<li>'+inline(ol[1])+'</li>');continue;}
+    if(inUl||inOl){out.push('</ul>');inUl=false;out.push('</ol>');inOl=false;}
+    if(l.trim()===''){continue;}
+    out.push('<p>'+inline(l.trim())+'</p>');
+  }
+  closeLists();
+  return out.join('\n');
+}
+function conv(){
+  document.getElementById('htmlOut').textContent=md2html(document.getElementById('in').value);
+}
+async function copyHtml(){
+  try{await navigator.clipboard.writeText(md2html(document.getElementById('in').value));}catch(e){}
+}
+function downloadHtml(){
+  const body=md2html(document.getElementById('in').value);
+  const doc='<!doctype html>\n<html>\n<head>\n<meta charset="utf-8">\n<title>Document</title>\n</head>\n<body>\n'+body+'\n</body>\n</html>';
+  const blob=new Blob([doc],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='document.html';a.click();URL.revokeObjectURL(a.href);
+}
+document.getElementById('in').addEventListener('input',conv);
+conv();
+</script>
+</body>
+</html>

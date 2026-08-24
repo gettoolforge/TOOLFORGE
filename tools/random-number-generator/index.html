@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Random Number Generator — Pick Numbers, Ranges & Dice | ToolForge</title>
+<meta name="description" content="Generate random numbers in any range: single picks, unique sets, lottery-style draws and dice rolls. Crypto-secure, free, private — runs in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/random-number-generator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Random Number Generator","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  input,select,button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin:12px 8px 0 0}
+  button.ghost{background:#232a38;color:var(--text)}
+  label{margin-right:14px}
+  input[type=number]{width:110px}
+  #big{font-size:2.6rem;font-weight:800;text-align:center;margin:18px 0;color:var(--ok);font-variant-numeric:tabular-nums;min-height:1.3em;word-break:break-all}
+  #list{text-align:center;color:var(--mut);min-height:1.5em;word-break:break-word}
+  #err{color:#f87171;text-align:center;min-height:1.4em;margin-top:6px}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Random Number Generator</span></header>
+  <p><span class="badge">Crypto-secure RNG</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>Random Number Generator</h1>
+  <p class="sub">Fair random numbers from your browser's cryptographic RNG — draws, dice, raffle winners.</p>
+
+  <div class="card">
+    <label>Min <input type="number" id="min" value="1"></label>
+    <label>Max <input type="number" id="max" value="100"></label>
+    <label>How many <input type="number" id="count" value="1" min="1" max="500"></label><br>
+    <label><input type="checkbox" id="uniq" checked style="width:auto"> No repeats (unique draw)</label><br>
+    <button onclick="roll()">🎲 Generate</button>
+    <button class="ghost" onclick="sortList()">Sort results</button>
+    <div id="big"></div>
+    <div id="list"></div>
+    <div id="err"></div>
+  </div>
+
+  <h2>What's it good for?</h2>
+  <ul>
+    <li><strong>Raffles & giveaways:</strong> put winner numbers 1–N with "no repeats" on.</li>
+    <li><strong>Dice:</strong> 1–6 per die; roll several for D&D-style sessions.</li>
+    <li><strong>Sampling:</strong> pick test cases, review assignments, workout reps — anything where bias ruins the point.</li>
+    <li>Fairness comes from <code>crypto.getRandomValues()</code> — unpredictable OS-level randomness, not a looping math formula.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+let last=[];
+function randInt(min,max){
+  const range=max-min+1;
+  if(range<=0)return null;
+  const maxUint=4294967296;
+  // rejection sampling for uniformity
+  const limit=Math.floor(maxUint/range)*range;
+  const buf=new Uint32Array(1);
+  do{crypto.getRandomValues(buf);}while(buf[0]>=limit);
+  return min+(buf[0]%range);
+}
+function roll(){
+  const err=document.getElementById('err');
+  let min=Math.trunc(parseFloat(document.getElementById('min').value));
+  let max=Math.trunc(parseFloat(document.getElementById('max').value));
+  let count=Math.max(1,Math.min(500,Math.trunc(parseInt(document.getElementById('count').value||'1',10))));
+  if(isNaN(min)||isNaN(max)){err.textContent='⚠ Enter valid min and max';return;}
+  if(min>max){[min,max]=[max,min];document.getElementById('min').value=min;document.getElementById('max').value=max;}
+  const uniq=document.getElementById('uniq').checked;
+  const range=max-min+1;
+  if(uniq&&count>range){err.textContent='⚠ Cannot pick '+count+' unique numbers from a range of '+range;return;}
+  last=[];err.textContent='';
+  if(uniq){
+    if(range<=2000&&count>range*0.6){
+      const pool=Array.from({length:range},(_,i)=>min+i);
+      for(let i=pool.length-1;i>0;i--){const j=randInt(0,i);[pool[i],pool[j]]=[pool[j],pool[i]];}
+      last=pool.slice(0,count);
+    }else{
+      const seen=new Set();
+      while(last.length<count){const v=randInt(min,max);if(!seen.has(v)){seen.add(v);last.push(v);}}
+    }
+  }else{
+    for(let i=0;i<count;i++)last.push(randInt(min,max));
+  }
+  render();
+}
+function render(){
+  document.getElementById('big').textContent=(last.length===1)?String(last[0]):'';
+  document.getElementById('list').textContent=(last.length>1)?last.join(', '):'';
+}
+function sortList(){last.sort((a,b)=>a-b);render();}
+</script>
+</body>
+</html>
