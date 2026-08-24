@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ToolForge — Free Browser Tools. Private. No Signup.</title>
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
 <meta name="description" content="Free online tools that run entirely in your browser: converters, generators, calculators. No upload, no signup, no watermark. Your data never leaves your device.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/">
 <style>
   :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff}
   *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
   main{max-width:880px;margin:0 auto;padding:24px 20px 64px}
-  h1{font-size:2rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0;font-size:1.05rem}
+  h1{font-size:2rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0;font-size:1.05rem}
   a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:22px}
-  .tool{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;display:block;color:var(--text)}
-  .tool:hover{border-color:var(--acc);text-decoration:none}
+  .tool{transition:all .15s ease;background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;display:block;color:var(--text)}
+  .tool:hover{border-color:var(--acc);text-decoration:none;transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,140,255,.18)}
   .tool h3{margin:0 0 6px}.tool p{margin:0;color:var(--mut);font-size:.92rem}
   .pill{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.78rem;margin-bottom:10px}
 </style>
@@ -26,37 +27,37 @@
 
   <div class="grid">
     <a class="tool" href="tools/srt-to-vtt/">
-      <span class="pill">Video · Subtitles</span>
+      <span class="pill" style="background:#f59e0b22;color:#f59e0b">Video · Subtitles</span>
       <h3>SRT → VTT Converter</h3>
       <p>Convert SubRip to WebVTT (and back) instantly. Auto-detects format, merges rolling captions.</p>
     </a>
     <a class="tool" href="tools/word-counter/">
-      <span class="pill">Writing · Students</span>
+      <span class="pill" style="background:#34d39922;color:#34d399">Writing · Students</span>
       <h3>Word Counter</h3>
       <p>Live count of words, characters, sentences and paragraphs as you type. Reading time included.</p>
     </a>
     <a class="tool" href="tools/json-formatter/">
-      <span class="pill">Developer</span>
+      <span class="pill" style="background:#4f8cff22;color:#4f8cff">Developer</span>
       <h3>JSON Formatter & Validator</h3>
       <p>Beautify, minify and validate JSON with precise error messages. Nothing leaves your machine.</p>
     </a>
     <a class="tool" href="tools/case-converter/">
-      <span class="pill">Text · Developer</span>
+      <span class="pill" style="background:#a78bfa22;color:#a78bfa">Text · Developer</span>
       <h3>Case Converter</h3>
       <p>UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_case — one click each.</p>
     </a>
     <a class="tool" href="tools/timestamp-converter/">
-      <span class="pill">Developer · IT</span>
+      <span class="pill" style="background:#38bdf822;color:#38bdf8">Developer · IT</span>
       <h3>Unix Timestamp Converter</h3>
       <p>Epoch seconds/milliseconds ↔ human dates, auto-detected. Live current timestamp, ISO 8601 output.</p>
     </a>
     <a class="tool" href="tools/uuid-generator/">
-      <span class="pill">Developer</span>
+      <span class="pill" style="background:#4f8cff22;color:#4f8cff">Developer</span>
       <h3>UUID Generator</h3>
       <p>Crypto-secure v4 UUIDs/GUIDs — one or bulk up to 500, upper/lowercase, download as .txt.</p>
     </a>
     <a class="tool" href="tools/color-converter/">
-      <span class="pill">Design</span>
+      <span class="pill" style="background:#fb718522;color:#fb7185">Design</span>
       <h3>Color Converter</h3>
       <p>HEX ⇄ RGB ⇄ HSL with live preview and one-click copy for every format.</p>
     </a>
@@ -66,7 +67,7 @@
       <p>Placeholder text by paragraphs, sentences or words — varied so it never looks copy-pasted.</p>
     </a>
     <a class="tool" href="tools/csv-to-json/">
-      <span class="pill">Data · Developer</span>
+      <span class="pill" style="background:#2dd4bf22;color:#2dd4bf">Data · Developer</span>
       <h3>CSV to JSON Converter</h3>
       <p>Quote-aware CSV parsing with smart number/boolean typing. Your data never leaves your machine.</p>
     </a>
