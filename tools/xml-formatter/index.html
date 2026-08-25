@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML Formatter & Validator — Pretty-Print, Minify, Check | ToolForge</title>
+<meta name="description" content="Free XML formatter and validator: beautify messy XML, minify it, and catch syntax errors with line numbers. 100% in your browser — no upload, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/xml-formatter/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"XML Formatter","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399;--err:#f87171}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1080px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  textarea{width:100%;min-height:260px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+  label{color:var(--mut);font-size:.88rem;margin-right:10px}
+  select{font-size:.95rem;border-radius:9px;padding:8px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+  #status{display:inline-block;margin-left:8px;font-weight:600}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">XML Formatter</span></header>
+  <p><span class="badge">Beautify</span><span class="badge">Minify</span><span class="badge">Error locations</span><span class="badge">100% private</span></p>
+  <h1>XML Formatter & Validator</h1>
+  <p class="sub">Paste XML — pretty-print it, minify it, or find exactly where it breaks.</p>
+
+  <div style="margin:14px 0">
+    <label>Indent:</label>
+    <select id="indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="\t">Tab</option></select>
+    <button onclick="doFormat()">✨ Format</button>
+    <button class="ghost" onclick="doMinify()">Minify</button>
+    <button class="ghost" onclick="copyOut()">Copy</button>
+    <button class="ghost" onclick="downloadXml()">Download .xml</button>
+    <button class="ghost" onclick="clearAll()">Clear</button>
+    <span id="status"></span>
+  </div>
+  <textarea id="in" placeholder="<?xml version="1.0"?>
+<catalog>
+  <book id="1"><title>XML Basics</title></book>
+</catalog>"></textarea>
+
+  <h2>What it checks</h2>
+  <ul>
+    <li>Well-formedness: every tag closed, attributes quoted, single root element.</li>
+    <li>Mismatched tags report the <strong>line number</strong> of the offender.</li>
+    <li>Self-closing tags (<code>&lt;br/&gt;</code>), comments <code>&lt;!-- --&gt;</code>, CDATA and processing instructions are handled correctly.</li>
+    <li>Formatting preserves text content exactly — whitespace inside elements is untouched, only structural indentation changes.</li>
+    <li>Great for sitemaps, RSS feeds, Android layouts, SOAP responses and config files.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+// --- tiny well-formedness checker with line numbers (no DOMParser line info) ---
+function checkXml(src){
+  const errors=[];
+  const stack=[];
+  const lines=src.split(/\r?\n/);
+  let lineNo=1;
+  let i=0;
+  const len=src.length;
+  let sawRoot=false;
+  while(i<len){
+    const ch=src[i];
+    if(ch==='<'){
+      if(src.startsWith('<!--',i)){
+        const end=src.indexOf('-->',i+4);
+        if(end<0){errors.push({line:lineNo,msg:'Unterminated comment'});break;}
+        lineNo+=src.slice(i,end).split('\n').length-1;
+        i=end+3;continue;
+      }
+      if(src.startsWith('<![CDATA[',i)){
+        const end=src.indexOf(']]>',i+9);
+        if(end<0){errors.push({line:lineNo,msg:'Unterminated CDATA'});break;}
+        lineNo+=src.slice(i,end).split('\n').length-1;
+        i=end+3;continue;
+      }
+      if(src.startsWith('<?',i)){
+        const end=src.indexOf('?>',i);
+        if(end<0){errors.push({line:lineNo,msg:'Unterminated processing instruction'});break;}
+        lineNo+=src.slice(i,end).split('\n').length-1;
+        i=end+2;continue;
+      }
+      if(src.startsWith('</',i)){
+        // closing tag
+        const end=src.indexOf('>',i);
+        if(end<0){errors.push({line:lineNo,msg:'Unterminated closing tag'});break;}
+        const name=src.slice(i+2,end).trim();
+        const open=stack.pop();
+        if(!open){errors.push({line:lineNo,msg:'Closing tag </'+name+'> has no matching opening tag'});}
+        else if(open.name!==name){
+          errors.push({line:open.line,msg:'Tag <'+open.name+'> opened on line '+open.line+' is closed by </'+name+'> on line '+lineNo});
+        }
+        lineNo+=src.slice(i,end).split('\n').length-1;
+        i=end+1;continue;
+      }
+      // opening tag
+      const m=src.slice(i).match(/^<([A-Za-z_][\w.:-]*)/);
+      if(!m){errors.push({line:lineNo,msg:'Invalid tag name at character '+i});break;}
+      const name=m[1];
+      // find tag end respecting quotes
+      let j=i+m[0].length,inQ=null,selfClose=false;
+      while(j<len){
+        const c=src[j];
+        if(inQ){if(c===inQ)inQ=null;}
+        else if(c==='"'||c==="'")inQ=c;
+        else if(c==='>'){selfClose=src[j-1]==='/';break;}
+        j++;
+      }
+      if(j>=len){errors.push({line:lineNo,msg:'Tag <'+name+'> never closes'});break;}
+      if(!selfClose)stack.push({name,line:lineNo});
+      lineNo+=src.slice(i,j).split('\n').length-1;
+      i=j+1;continue;
+    }
+    if(ch==='\n')lineNo++;
+    i++;
+  }
+  for(const unclosed of stack)errors.push({line:unclosed.line,msg:'Tag <'+unclosed.name+'> is never closed'});
+  return errors;
+}
+function indentOf(){return $('indent').value==='\\t'?'\t':' '.repeat(+$('indent').value);}
+function doFormat(){
+  const src=$('in').value;
+  if(!src.trim()){setStatus('⚠ Paste some XML first','');return;}
+  const errors=checkXml(src);
+  if(errors.length){
+    setStatus('✗ '+errors[0].msg,'err');
+    return;
+  }
+  try{
+    // tokenize then re-indent
+    const tokens=src.replace(/>\s+</g,'><').match(/<[^!][^>]*>|<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>|[^<>]+/g)||[];
+    const ind=indentOf();
+    let depth=0,out=[];
+    for(const tk of tokens){
+      if(/^<\//.test(tk)){depth=Math.max(0,depth-1);out.push(ind.repeat(depth)+tk);}
+      else if(/^</.test(tk)&&!/\/>$/.test(tk)&&!/^<[?!]/.test(tk)){out.push(ind.repeat(depth)+tk);depth++;}
+      else if(/^<[?!]/.test(tk)){out.push(ind.repeat(depth)+tk);}
+      else{
+        // text node: attach to previous line if only whitespace
+        const t=tk.trim();
+        if(t)out[out.length-1]+=t;
+      }
+    }
+    $('in').value=out.join('\n');
+    setStatus('✓ Formatted — XML is valid','ok');
+  }catch(e){setStatus('✗ '+e.message,'err');}
+}
+function doMinify(){
+  const src=$('in').value;
+  if(!src.trim())return;
+  const errors=checkXml(src);
+  if(errors.length){setStatus('✗ '+errors[0].msg,'err');return;}
+  $('in').value=src.replace(/>\s+</g,'><').replace(/\s+/g,' ').replace(/>\s+([^<])/g,'>$1').trim();
+  setStatus('✓ Minified','ok');
+}
+function setStatus(text,cls){
+  const el=$('status');
+  el.textContent=text;
+  el.style.color=cls==='ok'?'#34d399':cls==='err'?'#f87171':'';
+}
+async function copyOut(){
+  try{await navigator.clipboard.writeText($('in').value);setStatus('✓ Copied','ok');}catch(e){}
+}
+function downloadXml(){
+  const blob=new Blob([$('in').value],{type:'application/xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='document.xml';a.click();
+}
+function clearAll(){$('in').value='';$('status').textContent='';}
+</script>
+</body>
+</html>

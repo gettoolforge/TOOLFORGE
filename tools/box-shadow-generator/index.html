@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box Shadow Generator — Visual CSS box-shadow Builder | ToolForge</title>
+<meta name="description" content="Free CSS box-shadow generator with live preview: control X/Y offset, blur, spread, color and inset. Copy clean CSS instantly. No signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/box-shadow-generator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Box Shadow Generator","applicationCategory":"DesignApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:800px){.layout{grid-template-columns:1fr}}
+  .pane{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px}
+  .pane h3{margin:0 0 12px;font-size:.85rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+  .stage{min-height:260px;display:flex;align-items:center;justify-content:center;background:
+    repeating-conic-gradient(#12151c 0% 25%, #161a23 0% 50%) 0/24px 24px;border-radius:10px;border:1px solid #262c38}
+  #demo{width:150px;height:100px;border-radius:10px;background:#fff}
+  .ctrl{display:flex;align-items:center;gap:10px;margin-bottom:11px}
+  .ctrl label{width:70px;color:var(--mut);font-size:.88rem}
+  .ctrl input[type=range]{flex:1;accent-color:var(--acc)}
+  .ctrl input[type=number]{width:66px;padding:5px;border-radius:7px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);font-size:.9rem}
+  .ctrl input[type=color]{width:38px;height:32px;border:1px solid #2b3342;border-radius:7px;background:none;padding:2px;cursor:pointer}
+  .chk{margin-left:auto}
+  textarea{width:100%;margin-top:14px;font:13px/1.5 ui-monospace,Consolas,monospace;background:#0c0e13;color:var(--ok);
+    border:1px solid #2b3342;border-radius:10px;padding:10px;min-height:60px;resize:vertical;box-sizing:border-box}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:.95rem;cursor:pointer;margin-top:10px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Box Shadow</span></header>
+  <p><span class="badge">Live preview</span><span class="badge">Inset support</span><span class="badge">Copy-paste CSS</span><span class="badge">Free</span></p>
+  <h1>Box Shadow Generator</h1>
+  <p class="sub">Design soft UI shadows and dramatic drop shadows visually — copy the exact CSS.</p>
+
+  <div class="layout">
+    <div class="pane">
+      <h3>Preview</h3>
+      <div class="stage"><div id="demo"></div></div>
+      <textarea id="css" readonly></textarea>
+      <button onclick="copyCss()">Copy CSS</button>
+      <button class="ghost" onclick="randomShadow()">🎲 Random</button>
+      <span id="msg" style="color:var(--ok)"></span>
+    </div>
+    <div class="pane">
+      <h3>Controls</h3>
+      <div class="ctrl"><label>X offset</label><input type="range" id="x" min="-60" max="60" value="0"><input type="number" id="xn" value="0"></div>
+      <div class="ctrl"><label>Y offset</label><input type="range" id="y" min="-60" max="60" value="10"><input type="number" id="yn" value="10"></div>
+      <div class="ctrl"><label>Blur</label><input type="range" id="blur" min="0" max="120" value="30"><input type="number" id="blurn" value="30"></div>
+      <div class="ctrl"><label>Spread</label><input type="range" id="spread" min="-40" max="40" value="-6"><input type="number" id="spreadn" value="-6"></div>
+      <div class="ctrl"><label>Color</label><input type="color" id="color" value="#000000"><label style="width:auto">Opacity</label><input type="range" id="opacity" min="0" max="100" value="35"><input type="number" id="opacityn" min="0" max="100" value="35"></div>
+      <div class="ctrl"><label>Inset</label><input type="checkbox" id="inset" class="chk"></div>
+    </div>
+  </div>
+
+  <h2>Tips</h2>
+  <ul>
+    <li><strong>Soft UI look:</strong> Y offset 15–25, blur 40–60, negative spread, black at 10–20% opacity.</li>
+    <li><strong>Neumorphism:</strong> two shadows — one light (top-left), one dark (bottom-right), same offsets mirrored.</li>
+    <li>Negative spread shrinks the shadow before blurring — great for tighter glows.</li>
+    <li>Multiple shadows are allowed in real CSS by comma-separating them; this tool outputs one clean layer.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function hexToRgba(hex,op){
+  const n=parseInt(hex.slice(1),16);
+  return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+(op/100).toFixed(2)+')';
+}
+function buildCss(){
+  const x=$('x').value,y=$('y').value,blur=$('blur').value,spread=$('spread').value;
+  const col=hexToRgba($('color').value,+$('opacity').value||0);
+  const inset=$('inset').checked?'inset ':'';
+  const css=inset+x+'px '+y+'px '+blur+'px '+spread+'px '+col;
+  $('demo').style.boxShadow=css;
+  return 'box-shadow: '+css+';';
+}
+function syncPair(rangeId,numId){
+  $(rangeId).addEventListener('input',e=>{$(numId).value=e.target.value;render();});
+  $(numId).addEventListener('input',e=>{$(rangeId).value=e.target.value;render();});
+}
+function render(){$('css').value=buildCss();}
+['x','y','blur','spread','opacity'].forEach(id=>syncPair(id,id+'n'));
+$('color').addEventListener('input',render);
+$('inset').addEventListener('change',render);
+async function copyCss(){
+  try{
+    await navigator.clipboard.writeText($('css').value);
+    $('msg').textContent='✓ Copied';
+    setTimeout(()=>{$('msg').textContent='';},1500);
+  }catch(e){}
+}
+function randomShadow(){
+  const r=(a,b)=>Math.floor(a+Math.random()*(b-a));
+  set('x',r(-20,20));set('y',r(4,28));set('blur',r(10,70));set('spread',r(-14,2));
+  const hue=r(220,280);
+  $('color').value='#'+[0,hue>>8&255?0:0].map(()=>'').join('')||'#000000';
+  // simpler: pick from dark grays/blues
+  const shades=['#000000','#0f172a','#1e293b','#312e81','#4c1d95'];
+  $('color').value=shades[r(0,shades.length)];
+  set('opacity',r(15,45));
+  render();
+}
+function set(id,v){$(id).value=v;$(id+'n')&&($(id+'n').value=v);}
+render();
+</script>
+</body>
+</html>

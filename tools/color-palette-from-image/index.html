@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Palette from Image — Extract Dominant Colors | ToolForge</title>
+<meta name="description" content="Free color palette extractor: upload any image and pull its dominant colors as HEX, RGB and HSL. Runs entirely in your browser — your images never upload.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/color-palette-from-image/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Color Palette from Image","applicationCategory":"DesignApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0;text-align:center}
+  .drop{display:block;border:2px dashed #2b3342;border-radius:12px;padding:30px 16px;cursor:pointer;transition:.15s;text-align:center;margin-bottom:14px}
+  .drop:hover,.drop.over{border-color:var(--acc)}
+  input[type=file]{display:none}
+  #imgwrap img{max-width:min(100%,420px);border-radius:10px;display:block;margin:0 auto}
+  .row{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0}
+  select,label{font-size:.92rem}label{color:var(--mut)}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer}
+  #palette{display:none;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px}
+  .swatch{border-radius:10px;overflow:hidden;border:1px solid #262c38;cursor:pointer;transition:transform .12s}
+  .swatch:hover{transform:scale(1.04)}
+  .swatch .c{height:74px}
+  .swatch .info{background:#0c0e13;padding:8px;font:11px/1.5 ui-monospace,Consolas,monospace;color:var(--mut);word-break:break-all}
+  .swatch .info b{display:block;color:var(--text)}
+  h2{margin-top:26px;text-align:left}ul{text-align:left;padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Palette from Image</span></header>
+  <p><span class="badge">Never uploads</span><span class="badge">HEX · RGB · HSL</span><span class="badge">Click to copy</span><span class="badge">Free</span></p>
+  <h1>Color Palette from Image</h1>
+  <p class="sub">Drop in any image — extract its dominant colors for design inspiration. Analyzed locally via canvas.</p>
+
+  <div class="card">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/*">
+      <strong>🖼️ Drop an image here or click to choose</strong>
+      <span style="color:var(--mut);font-size:.88rem">PNG · JPG · WebP — processed on your device only</span>
+    </label>
+    <div id="imgwrap" style="display:none"><img id="img" alt="uploaded"></div>
+    <div class="row" id="opts" style="display:none">
+      <label>Colors:</label>
+      <select id="count"><option>4</option><option selected>6</option><option>8</option><option>10</option></select>
+      <button onclick="extract()">Extract palette</button>
+      <button onclick="copyAll()">Copy all HEX</button>
+    </div>
+    <div id="palette"></div>
+    <div id="msg" style="margin-top:10px;color:var(--err)"></div>
+  </div>
+
+  <h2>How extraction works</h2>
+  <ul>
+    <li>The image is drawn to a canvas and sampled — every Nth pixel is bucketed into coarse color bins.</li>
+    <li>The most populated bins become the palette (median-ish representative per bin), sorted by dominance.</li>
+    <li>Similar colors are merged so you get distinct hues rather than ten near-identical shades.</li>
+    <li><strong>Your image never leaves the device</strong> — canvas processing is fully local.</li>
+    <li>Click any swatch to copy its HEX value.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const drop=$('drop'),file=$('file'),img=$('img');
+let imgLoaded=false;
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+function loadFile(f){
+  if(!f||!f.type.startsWith('image/')){$('msg').textContent='⚠ That is not an image file';return;}
+  const url=URL.createObjectURL(f);
+  img.onload=()=>{imgLoaded=true;$('imgwrap').style.display='block';$('opts').style.display='flex';$('msg').textContent='';extract();};
+  img.onerror=()=>{$('msg').textContent='✗ Could not read that image';};
+  img.src=url;
+}
+drop.addEventListener('click',()=>file.click());
+file.addEventListener('change',e=>loadFile(e.target.files[0]));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)loadFile(f);});
+$('count').addEventListener('change',()=>{if(imgLoaded)extract();});
+// quantized palette extraction
+function rgbToHex(r,g,b){return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
+function hexToRgb(hex){
+  const n=parseInt(hex.slice(1),16);
+  return [(n>>16)&255,(n>>8)&255,n&255];
+}
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b),l=(max+min)/2;
+  let h=0,s=0;
+  if(max!==min){
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r:h=(g-b)/d+(g<b?6:0);break;
+      case g:h=(b-r)/d+2;break;
+      default:h=(r-g)/d+4;
+    }
+    h/=6;
+  }
+  return [Math.round(h*360),Math.round(s*100),Math.round(l*100)];
+}
+function extract(){
+  if(!imgLoaded)return;
+  $('msg').textContent='';
+  const W=160,H=Math.max(1,Math.round(160*img.naturalHeight/img.naturalWidth));
+  const cv=document.createElement('canvas');
+  cv.width=W;cv.height=H;
+  const ctx=cv.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(img,0,0,W,H);
+  let data;
+  try{data=ctx.getImageData(0,0,W,H).data;}
+  catch(e){$('msg').textContent='✗ Could not read image pixels';return;}
+  const want=parseInt($('count').value,10);
+  // bin colors into 4bits/channel = 4096 buckets
+  const buckets=new Map();
+  for(let i=0;i<data.length;i+=4){
+    if(data[i+3]<128)continue; // skip transparent
+    const r=data[i],g=data[i+1],b=data[i+2];
+    const key=((r>>4)<<8)|((g>>4)<<4)|(b>>4);
+    const e=buckets.get(key)||{n:0,r:0,g:0,b:0};
+    e.n++;e.r+=r;e.g+=g;e.b+=b;
+    buckets.set(key,e);
+  }
+  // sort buckets by population
+  const sorted=[...buckets.values()].sort((a,b)=>b.n-a.n);
+  const picked=[];
+  const minDist=48; // merge similar colors
+  for(const e of sorted){
+    const r=Math.round(e.r/e.n),g=Math.round(e.g/e.n),b=Math.round(e.b/e.n);
+    // skip near-white/near-black extremes unless image is mostly that
+    let tooClose=false;
+    for(const p of picked){
+      const dr=p.r-r,dg=p.g-g,db=p.b-b;
+      if(Math.sqrt(dr*dr+dg*dg+db*db)<minDist){tooClose=true;break;}
+    }
+    if(tooClose)continue;
+    picked.push({r,g,b,n:e.n});
+    if(picked.length>=want)break;
+  }
+  // render
+  const pal=$('palette');
+  pal.innerHTML='';
+  window.__hexes=[];
+  for(const p of picked){
+    const hex=rgbToHex(p.r,p.g,p.b);
+    const [h,s,l]=rgbToHsl(p.r,p.g,p.b);
+    window.__hexes.push(hex);
+    const div=document.createElement('div');
+    div.className='swatch';
+    div.innerHTML='<div class="c" style="background:'+hex+'"></div>'+
+      '<div class="info"><b>'+hex.toUpperCase()+'</b>'+
+      'rgb('+p.r+','+p.g+','+p.b+')<br>hsl('+h+', '+s+'%, '+l+'%)</div>';
+    div.title='Click to copy '+hex.toUpperCase();
+    div.addEventListener('click',()=>{
+      navigator.clipboard.writeText(hex.toUpperCase());
+      div.querySelector('b').textContent='Copied!';
+      setTimeout(()=>{div.querySelector('b').textContent=hex.toUpperCase();},900);
+    });
+    pal.appendChild(div);
+  }
+  pal.style.display='grid';
+}
+async function copyAll(){
+  if(!window.__hexes||!window.__hexes.length)return;
+  await navigator.clipboard.writeText(window.__hexes.join(', '));
+  $('msg').style.color='#34d399';
+  $('msg').textContent='✓ Copied all HEX values';
+  setTimeout(()=>{$('msg').textContent='';},1800);
+}
+</script>
+</body>
+</html>

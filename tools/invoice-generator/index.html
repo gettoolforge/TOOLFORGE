@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Generator — Free PDF Invoices, No Watermark | ToolForge</title>
+<meta name="description" content="Free invoice generator: create a professional invoice with your business details and line items, then download as PDF. No signup, no watermark — everything stays in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/invoice-generator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Invoice Generator","applicationCategory":"BusinessApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:1080px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+  .pane{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px}
+  .pane h3{margin:0 0 12px;font-size:.85rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+  input[type=text],input[type=number],input[type=date],textarea{width:100%;font-size:.95rem;border-radius:9px;padding:9px 11px;border:1px solid #2b3342;background:#0c0e13;color:var(--text);box-sizing:border-box;margin-bottom:10px}
+  textarea{min-height:60px;resize:vertical}
+  label{color:var(--mut);font-size:.82rem;display:block;margin-bottom:3px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  table.items{width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:8px}
+  table.items th{color:var(--mut);text-align:left;font-size:.78rem;text-transform:uppercase}
+  table.items td{padding:4px 4px 4px 0}
+  table.items input{margin-bottom:0}
+  .rm{background:none;border:none;color:var(--mut);cursor:pointer;font-size:1.1rem}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-top:12px;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  /* invoice preview */
+  #invoice{background:#fff;color:#111;border-radius:8px;padding:28px;font-size:.88rem;color:#222}
+  #inv-head{display:flex;justify-content:space-between;margin-bottom:18px}
+  #inv-title{font-size:1.5rem;font-weight:800;color:#111}
+  #inv-meta{color:#555;font-size:.78rem;text-align:right;line-height:1.5}
+  .inv-section{margin-bottom:12px}
+  .inv-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:2px}
+  table.inv-items{width:100%;border-collapse:collapse;margin:12px 0;font-size:.82rem}
+  table.inv-items th{text-align:left;background:#f4f5f7;padding:6px 8px;font-weight:600}
+  table.inv-items td{padding:6px 8px;border-bottom:1px solid #eee}
+  td.num,th.num{text-align:right}
+  #inv-totals{margin-left:auto;width:220px;font-size:.84rem}
+  #inv-totals div{display:flex;justify-content:space-between;padding:3px 0}
+  #inv-totals .grand{font-weight:800;font-size:1.05rem;border-top:2px solid #222;margin-top:4px;padding-top:6px}
+  h2{margin-top:26px}.muted{color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Invoice Generator</span></header>
+  <p><span class="badge">PDF download</span><span class="badge">No watermark</span><span class="badge">Stays in browser</span><span class="badge">Free</span></p>
+  <h1>Invoice Generator</h1>
+  <p class="sub">Fill the form — the invoice builds live. Download as PDF (via your browser's print-to-PDF) or print directly.</p>
+
+  <div class="layout">
+    <div class="pane">
+      <h3>Details</h3>
+      <label>From (your business):</label><textarea id="from">Your Name
+Your Street Address
+email@example.com</textarea>
+      <label>Bill to:</label><textarea id="to">Client Name
+Client Address</textarea>
+      <div class="two">
+        <div><label>Invoice #</label><input type="text" id="number" value="INV-001"></div>
+        <div><label>Date</label><input type="date" id="date"></div>
+      </div>
+      <div class="two">
+        <div><label>Currency symbol</label><input type="text" id="currency" value="€"></div>
+        <div><label>Tax %</label><input type="number" id="tax" value="24" min="0" step="any"></div>
+      </div>
+      <label>Notes (payment terms etc):</label><textarea id="notes" placeholder="Payment due within 14 days.&#10;Bank reference: FI00 0000 0000 0000"></textarea>
+
+      <h3 style="margin-top:16px">Line items</h3>
+      <table class="items"><thead><tr><th>Description</th><th style="width:64px">Qty</th><th style="width:92px">Unit price</th><th style="width:26px"></th></tr></thead><tbody id="rows"></tbody></table>
+      <button class="ghost" onclick="addRow()">+ Add item</button>
+    </div>
+
+    <div class="pane">
+      <h3>Live preview</h3>
+      <div id="invoice">
+        <div id="inv-head">
+          <div><div id="inv-title">INVOICE</div><div id="inv-number"></div></div>
+          <div id="inv-meta"></div>
+        </div>
+        <div style="display:flex;gap:30px">
+          <div class="inv-section" style="flex:1"><div class="inv-label">From</div><div id="inv-from"></div></div>
+          <div class="inv-section" style="flex:1"><div class="inv-label">Bill to</div><div id="inv-to"></div></div>
+        </div>
+        <table class="inv-items"><thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr></thead><tbody id="inv-rows"></tbody></table>
+        <div id="inv-totals"></div>
+        <div id="inv-notes" style="margin-top:16px;font-size:.76rem;color:#555;white-space:pre-line"></div>
+      </div>
+      <button onclick="window.print()">🖨 Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <h2>Notes</h2>
+  <ul>
+    <li>"Print / Save as PDF" opens your browser's print dialog — choose <strong>Save as PDF</strong> as destination.</li>
+    <li>The preview is styled to print cleanly: white background, no page chrome.</li>
+    <li>Tax is applied per line total; set to 0 for no tax.</li>
+    <li>This creates simple invoices, not legally-vat-compliant e-invoicing — check local requirements for B2B invoicing rules.</li>
+    <li>All data stays in your browser; nothing is sent anywhere.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<style>
+@media print{
+  body *{visibility:hidden}
+  #invoice,#invoice *{visibility:visible}
+  #invoice{position:absolute;left:0;top:0;width:100%;padding:40px}
+}
+</style>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>$('currency').value+(Math.round(n*100)/100).toLocaleString('en',{minimumFractionDigits:2});
+function addRow(desc='',qty=1,price=''){
+  const tr=document.createElement('tr');
+  tr.innerHTML='<td><input type="text" placeholder="Description of work"></td>'+
+    '<td><input type="number" min="0" step="any" value="'+qty+'"></td>'+
+    '<td><input type="number" min="0" step="any" placeholder="0.00" value="'+price+'"></td>'+
+    '<td><button class="rm" title="Remove">×</button></td>';
+  tr.querySelector('.rm').addEventListener('click',()=>tr.remove());
+  tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',render));
+  $('rows').appendChild(tr);
+}
+function getRows(){
+  return [...document.querySelectorAll('#rows tr')].map(tr=>{
+    const [d,q,p]=tr.querySelectorAll('input');
+    return {desc:d.value,qty:+q.value||0,price:+p.value||0};
+  }).filter(r=>r.desc||r.price);
+}
+function render(){
+  const rows=getRows();
+  // meta
+  $('inv-number').textContent=$('number').value;
+  const d=$('date').value?new Date($('date').value+'T00:00:00'):new Date();
+  $('inv-meta').innerHTML='Date: '+d.toLocaleDateString(undefined,{dateStyle:'long'});
+  $('inv-from').innerHTML=$('from').value.split('\n').map(l=>l?l:'&nbsp;').join('<br>');
+  $('inv-to').innerHTML=$('to').value.split('\n').map(l=>l?l:'&nbsp;').join('<br>');
+  // items
+  let sub=0;
+  $('inv-rows').innerHTML=rows.map(r=>{
+    const tot=r.qty*r.price;sub+=tot;
+    return '<tr><td>'+r.desc.replace(/</g,'&lt;')+'</td><td class="num">'+r.qty+'</td><td class="num">'+fmt(r.price)+'</td><td class="num">'+fmt(tot)+'</td></tr>';
+  }).join('');
+  const taxRate=+$('tax').value||0;
+  const taxAmt=sub*taxRate/100;
+  $('inv-totals').innerHTML=
+    '<div><span>Subtotal</span><span>'+fmt(sub)+'</span></div>'+
+    '<div><span>Tax ('+taxRate+'%)</span><span>'+fmt(taxAmt)+'</span></div>'+
+    '<div class="grand"><span>Total</span><span>'+fmt(sub+taxAmt)+'</span></div>';
+  $('inv-notes').textContent=$('notes').value;
+}
+['from','to','number','date','currency','tax','notes'].forEach(id=>$(id).addEventListener('input',render));
+[['Web design services',1,'450'],['Hosting (yearly)',1,'60']].forEach(r=>addRow(...r));
+$('date').value=new Date().toISOString().slice(0,10);
+render();
+</script>
+</body>
+</html>

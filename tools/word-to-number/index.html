@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word to Number Converter — Text Numbers to Digits | ToolForge</title>
+<meta name="description" content="Convert written numbers (twenty-three thousand) into digits (23000) — and digits back to words. Free browser tool for developers and data cleaning.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/word-to-number/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Word to Number Converter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0;text-align:center}
+  .dir{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+  button{background:#232a38;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:8px 16px;font-size:.92rem;cursor:pointer}
+  button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+  textarea,input[type=text]{width:min(100%,600px);background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px 14px;font-size:1.02rem;box-sizing:border-box}
+  textarea{min-height:80px;resize:vertical;margin-top:12px}
+  #result{margin-top:14px;min-height:1.6em}
+  #big{font-size:2rem;font-weight:800;color:var(--ok);word-break:break-all}
+  .muted{color:var(--mut);font-size:.88rem;margin-top:6px}
+  h2{margin-top:26px;text-align:left}ul{text-align:left;padding-left:22px}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Word ↔ Number</span></header>
+  <p><span class="badge">Both directions</span><span class="badge">Handles negatives</span><span class="badge">100% private</span><span class="badge">Free</span></p>
+  <h1>Word ↔ Number Converter</h1>
+  <p class="sub">“twenty-three thousand four hundred fifty-six” ⇄ “23456”.</p>
+
+  <div class="card">
+    <div class="dir">
+      <button id="w2n" class="active">Words → Number</button>
+      <button id="n2w">Number → Words</button>
+    </div>
+    <textarea id="in" placeholder="twenty-three thousand four hundred fifty-six"></textarea>
+    <div id="result"><div id="big"></div><div class="muted" id="note"></div></div>
+  </div>
+
+  <h2>Handles</h2>
+  <ul>
+    <li>Units through trillions · hyphenated compounds (<code>forty-two</code>) · “and” (<code>one hundred and five</code>)</li>
+    <li>Negatives (“minus eight”, “negative three”) · zero / oh / nil</li>
+    <li>Digits → words in short scale (US/UK modern), with optional check-writing style on request</li>
+    <li>Great for data cleaning, invoice parsing, voice-assistant output processing.</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const SMALL={zero:0,oh:0,nil:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,
+ eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,
+ twenty:20,thirty:30,forty:40,fourty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90};
+const MAG={hundred:100,thousand:1e3,lakh:1e5,million:1e6,crore:1e7,billion:1e9,trillion:1e12};
+function wordsToNumber(text){
+  const neg=/^(minus|negative)\b/i.test(text.trim());
+  const clean=text.toLowerCase().replace(/(minus|negative)/gi,'').replace(/[^a-z\s]/g,' ').trim();
+  if(!clean)return null;
+  if(clean==='zero'||clean==='oh'||clean==='nil')return neg?-0:0;
+  const tokens=clean.split(/\s+/).filter(t=>t&&t!=='and');
+  let total=0,current=0,any=false;
+  for(const t of tokens){
+    if(SMALL[t]!==undefined){current+=SMALL[t];any=true;}
+    else if(MAG[t]!==undefined){
+      any=true;
+      if(t==='hundred'){current=(current||1)*100;}
+      else{current=(current||1)*MAG[t];total+=current;current=0;}
+    }
+    else return null;
+  }
+  if(!any)return null;
+  const n=total+current;
+  return neg?-n:n;
+}
+const ONES=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+function chunkWords(n){
+  if(n<20)return ONES[n];
+  if(n<100)return TENS[Math.floor(n/10)]+(n%10?'-'+ONES[n%10]:'');
+  return ONES[Math.floor(n/100)]+' hundred'+(n%100?' '+chunkWords(n%100):'');
+}
+function numberToWords(num){
+  if(!isFinite(num))return null;
+  if(Object.is(num,-0)||num===0)return 'zero';
+  const neg=num<0;
+  num=Math.abs(Math.trunc(num));
+  const scales=[[1e12,'trillion'],[1e9,'billion'],[1e6,'million'],[1e3,'thousand']];
+  let parts=[];
+  for(const [v,name] of scales){
+    if(num>=v){parts.push(chunkWords(Math.floor(num/v))+' '+name);num%=v;}
+  }
+  if(num>0)parts.push(chunkWords(num));
+  return (neg?'minus ':'')+parts.join(' ');
+}
+let mode='w2n';
+function convert(){
+  const src=$('in').value.trim();
+  if(mode==='w2n'){
+    const n=wordsToNumber(src);
+    $('big').textContent=n===null?'—':n.toLocaleString('en');
+    $('note').textContent=n===null?(src?'⚠ Not a recognized number phrase':''):'raw value: '+n;
+  }else{
+    const n=parseFloat(src.replace(/[,\s]/g,''));
+    const w=isNaN(n)?null:numberToWords(n);
+    $('big').textContent=w||'—';
+    $('note').textContent=w?'':'⚠ Enter a valid whole number';
+  }
+}
+$('w2n').addEventListener('click',()=>{
+  mode='w2n';$('w2n').classList.add('active');$('n2w').classList.remove('active');
+  $('in').value='';$('in').placeholder='twenty-three thousand four hundred fifty-six';convert();
+});
+$('n2w').addEventListener('click',()=>{
+  mode='n2w';$('n2w').classList.add('active');$('w2n').classList.remove('active');
+  $('in').value='';$('in').placeholder='23456';convert();
+});
+$('in').addEventListener('input',convert);
+convert();
+</script>
+</body>
+</html>
