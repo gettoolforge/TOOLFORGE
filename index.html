@@ -4,287 +4,339 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ToolForge — Free Browser Tools. Private. No Signup.</title>
-<meta name="description" content="Free online tools that run entirely in your browser: converters, generators, calculators. No upload, no signup, no watermark. Your data never leaves your device.">
+<meta name="description" content="37 free online tools that run entirely in your browser: calculators, converters, generators and analyzers. No signup, no uploads, 100% private — including BPM & key detection from audio files.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/">
 <link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"ToolForge","url":"https://gettoolforge.github.io/TOOLFORGE/"}
+</script>
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff}
-  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-  main{max-width:960px;margin:0 auto;padding:24px 20px 64px}
-  h1{font-size:2rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--mut);margin-top:0;font-size:1.05rem}
-  a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-  /* ---- finder ---- */
-  .finder{position:sticky;top:0;z-index:10;background:linear-gradient(var(--bg) 82%,transparent);padding:10px 0;margin:-10px 0 0}
-  .search{width:100%;padding:13px 18px;font-size:1.05rem;border-radius:12px;border:1px solid #2b3342;background:#171a21;color:var(--text);outline:none}
-  .search:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,140,255,.15)}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .chip{background:#1d2534;border:1px solid #262c38;color:var(--mut);border-radius:999px;padding:5px 14px;font-size:.85rem;cursor:pointer}
-  .chip:hover{color:var(--text)}
-  .chip.active{background:#1d2534;border-color:var(--acc);color:var(--acc)}
-  #count{font-size:.85rem;color:var(--mut);margin-top:10px;display:block}
-  /* ---- grid ---- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:14px}
-  .tool{transition:all .15s ease;background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;display:block;color:var(--text)}
-  .tool:hover{border-color:var(--acc);text-decoration:none;transform:translateY(-3px);box-shadow:0 8px 24px rgba(79,140,255,.18)}
-  .tool h3{margin:0 0 6px}.tool p{margin:0;color:var(--mut);font-size:.92rem}
-  .pill{display:inline-block;border-radius:999px;padding:2px 12px;font-size:.78rem;margin-bottom:10px}
-  .c-video{background:rgba(245,158,11,.13);color:#f59e0b}
-  .c-writing{background:rgba(52,211,153,.13);color:#34d399}
-  .c-dev{background:rgba(79,140,255,.13);color:#4f8cff}
-  .c-design{background:rgba(251,113,133,.13);color:#fb7185}
-  .c-data{background:rgba(45,212,191,.13);color:#2dd4bf}
-  .c-calc{background:rgba(167,139,250,.13);color:#a78bfa}
-  #empty{display:none;text-align:center;color:var(--mut);padding:40px 0}
-  ul{padding-left:22px}.muted{color:var(--mut)}
+  :root{
+    --bg:#0b0d12;--bg2:#0f1219;--card:#141824;--card2:#181d2c;--line:#232a3a;
+    --text:#e8ecf4;--mut:#94a0b8;--acc:#4f8cff;--acc2:#7aa5ff;
+    --video:#f59e0b;--writing:#34d399;--dev:#4f8cff;--design:#e879f9;--data:#2dd4bf;--calc:#fb923c;--health:#f87171;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:
+    radial-gradient(1200px 600px at 80% -200px,#1a2340 0%,transparent 60%),
+    radial-gradient(900px 500px at -100px 30%,#131a2e 0%,transparent 55%),var(--bg);
+    color:var(--text)}
+  a{color:inherit}
+  main{max-width:1080px;margin:0 auto;padding:20px 20px 70px}
+
+  /* ---------- top bar ---------- */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:6px 2px 18px;border-bottom:1px solid var(--line);margin-bottom:26px}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:1.15rem;letter-spacing:.01em}
+  .logo .gear{width:30px;height:30px;display:block}
+  .top .stats{color:var(--mut);font-size:.85rem;text-align:right}
+  .top .stats b{color:var(--ok,#34d399)}
+
+  /* ---------- hero ---------- */
+  .hero{text-align:center;padding:26px 10px 10px;margin-bottom:8px}
+  h1.hero-line{font-size:clamp(1.9rem,5vw,2.9rem);margin:0 0 10px;line-height:1.15;font-weight:800;
+    background:linear-gradient(92deg,#e8ecf4 30%,#9db9ff 75%,#c99cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--mut);max-width:600px;margin:0 auto;font-size:1.02rem}
+  .hero .trust{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:14px;color:var(--mut);font-size:.85rem}
+  .hero .trust span::before{content:'✓ ';color:var(--ok,#34d399)}
+
+  /* ---------- finder ---------- */
+  .finder-wrap{position:sticky;top:0;z-index:50;padding:10px 0;background:linear-gradient(var(--bg) 82%,transparent);margin-bottom:6px}
+  .finder{display:flex;gap:10px;align-items:center;max-width:680px;margin:0 auto;
+    background:rgba(20,24,36,.88);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+  .finder:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(79,140,255,.15)}
+  .finder input{flex:1;background:none;border:0;color:var(--text);font-size:1.05rem;outline:none;min-width:120px}
+  .finder .icon{opacity:.6}
+  .finder kbd{background:#232a3a;color:var(--mut);border-radius:6px;padding:2px 8px;font-size:.78rem}
+
+  /* ---------- category chips ---------- */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0 22px}
+  .chip{cursor:pointer;user-select:none;border:1px solid var(--line);background:var(--card);
+    border-radius:999px;padding:7px 15px;font-size:.9rem;color:var(--mut);transition:all .15s}
+  .chip:hover{border-color:var(--acc);color:var(--text)}
+  .chip.on{color:#fff;border-color:transparent}
+  .chip.on[data-c=all]{background:linear-gradient(90deg,var(--acc),#8b5cf6)}
+  .chip.on[data-c=video]{background:var(--video);box-shadow:0 0 14px rgba(245,158,11,.35)}
+  .chip.on[data-c=writing]{background:var(--writing);box-shadow:0 0 14px rgba(52,211,153,.35)}
+  .chip.on[data-c=dev]{background:var(--dev);box-shadow:0 0 14px rgba(79,140,255,.35)}
+  .chip.on[data-c=design]{background:var(--design);box-shadow:0 0 14px rgba(232,121,249,.35)}
+  .chip.on[data-c=data]{background:var(--data);box-shadow:0 0 14px rgba(45,212,191,.35)}
+  .chip.on[data-c=calc]{background:var(--calc);box-shadow:0 0 14px rgba(251,146,60,.35)}
+  .chip.on[data-c=health]{background:var(--health);box-shadow:0 0 14px rgba(248,113,113,.35)}
+  .chip .n{opacity:.65;font-size:.8em;margin-left:4px}
+
+  /* ---------- sections & grid ---------- */
+  .cat-section{margin-bottom:34px}
+  .cat-head{display:flex;align-items:baseline;gap:10px;margin:0 2px 12px}
+  .cat-head h2{font-size:1.15rem;margin:0}
+  .cat-head .bar{height:3px;width:34px;border-radius:3px;display:inline-block}
+  .cat-head .desc{color:var(--mut);font-size:.85rem;font-weight:400}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px}
+  .tool{position:relative;display:flex;flex-direction:column;gap:5px;text-decoration:none;
+    background:linear-gradient(160deg,var(--card),var(--bg2));
+    border:1px solid var(--line);border-radius:14px;padding:15px 16px 14px;
+    transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+  .tool:hover{transform:translateY(-3px);border-color:var(--tc,var(--acc));box-shadow:0 10px 26px -12px rgba(0,0,0,.7)}
+  .tool:hover h3{color:var(--tc,var(--acc))}
+  .pill{align-self:flex-start;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;font-weight:700;
+    border-radius:6px;padding:2px 8px;margin-bottom:3px}
+  .tool h3{margin:0;font-size:1.01rem;line-height:1.3}
+  .tool p{margin:0;color:var(--mut);font-size:.86rem;line-height:1.45}
+  .tool .go{position:absolute;top:12px;right:14px;opacity:0;transition:opacity .16s;color:var(--tc,var(--acc));font-weight:700}
+  .tool:hover .go{opacity:1}
+  /* per-category accents */
+  .t-video{--tc:var(--video)} .t-writing{--tc:var(--writing)} .t-dev{--tc:var(--dev)}
+  .t-design{--tc:var(--design)} .t-data{--tc:var(--data)} .t-calc{--tc:var(--calc)} .t-health{--tc:var(--health)}
+  .p-video{background:rgba(245,158,11,.14);color:var(--video)} .p-writing{background:rgba(52,211,153,.14);color:var(--writing)}
+  .p-dev{background:rgba(79,140,255,.14);color:var(--dev)} .p-design{background:rgba(232,121,249,.14);color:var(--design)}
+  .p-data{background:rgba(45,212,191,.14);color:var(--data)} .p-calc{background:rgba(251,146,60,.14);color:var(--calc)}
+  .p-health{background:rgba(248,113,113,.14);color:var(--health)}
+
+  #count{color:var(--mut);font-size:.85rem;text-align:center;min-height:1.4em;margin:-8px 0 18px}
+  #noRes{display:none;text-align:center;color:var(--mut);padding:40px 0}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding-top:22px;color:var(--mut);font-size:.85rem;text-align:center;line-height:2}
+  footer a{color:var(--acc2);text-decoration:none}
 </style>
 </head>
 <body>
 <main>
-  <h1>⚙️ ToolForge</h1>
-  <p class="sub">Free tools that run <strong>100% in your browser</strong>. No uploads, no accounts, no watermarks — your files never leave your device.</p>
+  <div class="top">
+    <a class="logo" href="./"><img class="gear" src="/TOOLFORGE/favicon.svg" alt="">ToolForge</a>
+    <div class="stats"><b id="statCount">37</b> tools · <b>€0</b> · no accounts</div>
+  </div>
 
-  <div class="finder">
-    <input class="search" id="q" type="search" placeholder="🔍 Search tools… try “json”, “counter”, “convert”" aria-label="Search tools">
-    <div class="chips" id="chips">
-      <button class="chip active" data-cat="all">All</button>
-      <button class="chip" data-cat="video">🎬 Video</button>
-      <button class="chip" data-cat="writing">✍️ Writing</button>
-      <button class="chip" data-cat="dev">💻 Developer</button>
-      <button class="chip" data-cat="design">🎨 Design</button>
-      <button class="chip" data-cat="data">📊 Data</button>
-      <button class="chip" data-cat="calc">🧮 Calculators</button>
+  <div class="hero">
+    <h1 class="hero-line">Everyday tools that never leave your device.</h1>
+    <p>Calculators, converters, generators and even audio analysis — all running locally in your browser. Nothing is uploaded, ever.</p>
+    <div class="trust"><span>No signup</span><span>No uploads</span><span>Works offline</span><span>Free forever</span></div>
+  </div>
+
+  <div class="finder-wrap">
+    <div class="finder">
+      <span class="icon">🔍</span>
+      <input id="q" type="search" placeholder="Search 37 tools… try 'bpm', 'pdf', 'percent'" autocomplete="off">
+      <kbd>/</kbd>
     </div>
-    <span id="count"></span>
+    <div class="chips" id="chips">
+      <button class="chip on" data-c="all">All<span class="n">37</span></button>
+      <button class="chip" data-c="calc">🧮 Calculators<span class="n">13</span></button>
+      <button class="chip" data-c="dev">💻 Developer & Audio<span class="n">11</span></button>
+      <button class="chip" data-c="writing">✍️ Writing<span class="n">7</span></button>
+      <button class="chip" data-c="design">🎨 Design<span class="n">2</span></button>
+      <button class="chip" data-c="data">📊 Data<span class="n">1</span></button>
+      <button class="chip" data-c="video">🎬 Video<span class="n">1</span></button>
+      <button class="chip" data-c="health">❤️ Health<span class="n">2</span></button>
+    </div>
   </div>
 
-  <div class="grid" id="grid">
-    <a class="tool" data-cat="video" data-kw="srt vtt subtitle captions convert webvtt subrip video" href="tools/srt-to-vtt/">
-      <span class="pill c-video">Video · Subtitles</span>
-      <h3>SRT → VTT Converter</h3>
-      <p>Convert SubRip to WebVTT (and back) instantly. Auto-detects format, merges rolling captions.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="word count characters sentences paragraphs reading time essay writing" href="tools/word-counter/">
-      <span class="pill c-writing">Writing · Students</span>
-      <h3>Word Counter</h3>
-      <p>Live count of words, characters, sentences and paragraphs as you type. Reading time included.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="json format beautify minify validate pretty parser developer" href="tools/json-formatter/">
-      <span class="pill c-dev">Developer</span>
-      <h3>JSON Formatter & Validator</h3>
-      <p>Beautify, minify and validate JSON with precise error messages. Nothing leaves your machine.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="uppercase lowercase title camelcase pascal snake sentence text case" href="tools/case-converter/">
-      <span class="pill c-writing">Text · Developer</span>
-      <h3>Case Converter</h3>
-      <p>UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_case — one click each.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="unix epoch timestamp date time seconds milliseconds utc iso" href="tools/timestamp-converter/">
-      <span class="pill c-dev">Developer · IT</span>
-      <h3>Unix Timestamp Converter</h3>
-      <p>Epoch seconds/milliseconds ↔ human dates, auto-detected. Live current timestamp, ISO 8601 output.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="uuid guid unique identifier random id v4 bulk" href="tools/uuid-generator/">
-      <span class="pill c-dev">Developer</span>
-      <h3>UUID Generator</h3>
-      <p>Crypto-secure v4 UUIDs/GUIDs — one or bulk up to 500, upper/lowercase, download as .txt.</p>
-    </a>
-    <a class="tool" data-cat="design" data-kw="hex rgb hsl color convert picker palette css" href="tools/color-converter/">
-      <span class="pill c-design">Design</span>
-      <h3>Color Converter</h3>
-      <p>HEX ⇄ RGB ⇄ HSL with live preview and one-click copy for every format.</p>
-    </a>
-    <a class="tool" data-cat="design" data-kw="lorem ipsum placeholder filler dummy text mockup" href="tools/lorem-ipsum-generator/">
-      <span class="pill c-design">Design · Writing</span>
-      <h3>Lorem Ipsum Generator</h3>
-      <p>Placeholder text by paragraphs, sentences or words — varied so it never looks copy-pasted.</p>
-    </a>
-    <a class="tool" data-cat="data" data-kw="csv json convert spreadsheet excel parse data" href="tools/csv-to-json/">
-      <span class="pill c-data">Data · Developer</span>
-      <h3>CSV to JSON Converter</h3>
-      <p>Quote-aware CSV parsing with smart number/boolean typing. Your data never leaves your machine.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="password secure random generator passphrase safety strength" href="tools/password-generator/">
-      <span class="pill c-dev">Security · Developer</span>
-      <h3>Password Generator</h3>
-      <p>Strong crypto-secure passwords: custom length, symbols, look-alike exclusion, strength meter.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="diff compare changes versions text files lines added removed git" href="tools/text-diff/">
-      <span class="pill c-writing">Text · Developer</span>
-      <h3>Text Diff Checker</h3>
-      <p>Compare two texts line by line — additions and removals highlighted like a code diff.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="unit convert length weight temperature metric imperial km miles kg pounds celsius fahrenheit data size" href="tools/unit-converter/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Unit Converter</h3>
-      <p>Length, weight, temperature, area, volume, speed and data units — precise instant conversion.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="markdown html convert md preview readme blog formatting" href="tools/markdown-to-html/">
-      <span class="pill c-dev">Developer · Writing</span>
-      <h3>Markdown → HTML</h3>
-      <p>Convert Markdown to clean HTML as you type — headings, lists, links, code, quotes.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="random number dice raffle lottery draw pick rng range" href="tools/random-number-generator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Random Number Generator</h3>
-      <p>Fair random picks in any range — draws, dice and sampling with optional no-repeats.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="base64 encode decode btoa atob utf8 text binary" href="tools/base64-encoder/">
-      <span class="pill c-dev">Developer</span>
-      <h3>Base64 Encoder / Decoder</h3>
-      <p>Text ⇄ Base64 with full UTF-8 safety — emoji, ä/ö and CJK survive the round trip.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="age birthday years months days how old next birthday countdown" href="tools/age-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Age Calculator</h3>
-      <p>Calendar-exact age in years, months and days — plus total days lived and next-birthday countdown.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="hash sha256 sha512 sha1 checksum fingerprint digest integrity" href="tools/hash-generator/">
-      <span class="pill c-dev">Security · Developer</span>
-      <h3>Hash Generator</h3>
-      <p>SHA-256, SHA-384, SHA-512 & SHA-1 fingerprints via the Web Crypto API. Click any hash to copy.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="percent of number increase decrease change discount fraction" href="tools/percentage-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Percentage Calculator</h3>
-      <p>All 3 percentage questions: X% of Y, what percent, and % change — with formulas shown.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="bmi body mass index weight height obesity who healthy range imperial metric" href="tools/bmi-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>BMI Calculator</h3>
-      <p>Body Mass Index in metric or imperial with WHO category and your healthy weight range.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="compound interest savings investment grow contributions future value compounding" href="tools/compound-interest-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Compound Interest Calculator</h3>
-      <p>Savings growth with monthly compounding and contributions — year-by-year table included.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="loan emi mortgage monthly payment interest amortization borrow bank" href="tools/loan-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Loan / EMI Calculator</h3>
-      <p>Monthly payment, total interest and yearly amortization for any loan amount, rate and term.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="tip gratuity restaurant bill split per person service" href="tools/tip-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Tip Calculator</h3>
-      <p>Pick a tip % or type your own, split the bill between any number of people instantly.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="sleep cycle bedtime wake up refreshed 90 minutes rem rem morning night" href="tools/sleep-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Sleep Calculator</h3>
-      <p>Find bedtimes that let you wake between 90-minute sleep cycles instead of mid-deep-sleep.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="date difference days between dates countdown deadline business days workweek duration" href="tools/date-difference-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Date Difference Calculator</h3>
-      <p>Days, weeks and business days between two dates — deadlines, trips and project math.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="discount sale price off savings coupon deal percentage markdown bargain" href="tools/discount-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Discount Calculator</h3>
-      <p>Sale price and real savings from % off — including the stacked-discount trap explained.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="calorie tdee bmr maintenance deficit bulk weight loss diet metabolism daily burn" href="tools/calorie-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Calorie Calculator (TDEE)</h3>
-      <p>Daily calorie burn and targets for cutting or bulking, using the Mifflin-St Jeor formula.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="words to pages essay how many pages 500 1000 2500 words reading time speaking students" href="tools/words-to-pages/">
-      <span class="pill c-writing">Writing</span>
-      <h3>Words to Pages Converter</h3>
-      <p>How many pages is 1000 words? Single/double-spaced conversion plus reading & speaking times.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="gpa grade point average college university weighted ap honors semester credits 4.0 scale student" href="tools/gpa-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>GPA Calculator</h3>
-      <p>Semester GPA on the 4.0 scale with +/− precision and AP/Honors weighting. Credit-hour aware.</p>
-    </a>
-    <a class="tool" data-cat="design" data-kw="aspect ratio resize video image dimensions 16:9 9:16 shorts instagram without distortion scale" href="tools/aspect-ratio-calculator/">
-      <span class="pill c-design">Writing</span>
-      <h3>Aspect Ratio Calculator</h3>
-      <p>Resize without distortion: set a ratio (16:9, 9:16, 1:1…), change one side, get the other with live preview.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="bpm tempo key detector beats per minute musical analyze song beat dj producer camelot harmonic" href="tools/bpm-key-detector/">
-      <span class="pill c-dev">Audio · Producer</span>
-      <h3>BPM & Key Detector</h3>
-      <p>Upload a song or beat — get tempo AND musical key in one pass. Analyzed locally, never uploaded.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="qr code generator url wifi text static png svg never expire scan" href="tools/qr-code-generator/">
-      <span class="pill c-dev">Developer</span>
-      <h3>QR Code Generator</h3>
-      <p>Static QR codes for URLs, WiFi and more — never expire, download as PNG or SVG. Generated locally.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="metronome bpm click track practice tempo tap musician drums guitar time signature" href="tools/metronome/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Online Metronome</h3>
-      <p>Sample-accurate click with tap tempo, time signatures, subdivisions and beat indicators.</p>
-    </a>
-    <a class="tool" data-cat="dev" data-kw="password strength test secure check entropy crack time how strong security" href="tools/password-strength-checker/">
-      <span class="pill c-dev">Developer</span>
-      <h3>Password Strength Checker</h3>
-      <p>Test a password: entropy, crack-time estimates and specific tips — checked locally only.</p>
-    </a>
-    <a class="tool" data-cat="calc" data-kw="days until countdown calculator birthday holiday deadline how many days since event" href="tools/days-until-calculator/">
-      <span class="pill c-calc">Calculators</span>
-      <h3>Days Until Calculator</h3>
-      <p>Exact countdown to any date in days, weeks and working days — or days since.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="text repeat emoji spam times multiple copy paste filler duplicate" href="tools/text-repeater/">
-      <span class="pill c-writing">Writing</span>
-      <h3>Text Repeater</h3>
-      <p>Repeat text or emoji up to ×1000 with custom separators and optional numbering.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="stopwatch timer laps splits milliseconds precise countdown elapsed sport timing" href="tools/stopwatch/">
-      <span class="pill c-writing">Writing</span>
-      <h3>Online Stopwatch</h3>
-      <p>Millisecond-precision stopwatch with lap/split table, keyboard shortcuts, copy as text.</p>
-    </a>
-    <a class="tool" data-cat="writing" data-kw="character counter limit twitter x instagram meta description sms seo title length" href="tools/character-limits/">
-      <span class="pill c-writing">Writing</span>
-      <h3>Character Counter with Limits</h3>
-      <p>Live character count against platform limits: X 280, meta 158, SMS 160 and more.</p>
-    </a>
-    <!-- AGENTS: add new tool cards here -->
-  </div>
-  <div id="empty">😕 No tools match. Try another word.</div>
+  <div id="count"></div>
 
-  <h2>Why ToolForge?</h2>
-  <ul>
-    <li><strong>Private by architecture:</strong> every tool is client-side JavaScript — nothing is uploaded to any server.</li>
-    <li><strong>No friction:</strong> no signup walls, no trial popups, no watermarks.</li>
-    <li><strong>Free forever:</strong> supported by unobtrusive ads.</li>
-  </ul>
+  <!-- ======== CATEGORY SECTIONS (grouped, scannable) ======== -->
+  <!-- AGENTS: keep new cards inside their category section; add data-kw for search -->
 
-  <p style="margin-top:40px;color:var(--mut);font-size:.9rem">© 2026 ToolForge · Built for speed and privacy.</p>
+  <section class="cat-section" data-cat="calc">
+    <div class="cat-head"><span class="bar" style="background:var(--calc)"></span><h2>🧮 Calculators</h2><span class="desc">money, dates & everyday math</span></div>
+    <div class="grid">
+      <a class="tool t-calc" data-cat="calc" data-kw="percentage percent of change increase discount calculator" href="tools/percentage-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Percentage Calculator</h3>
+        <p>Of-amount, is-what-% and % change in one tool.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="compound interest savings investment growth rule of 72" href="tools/compound-interest-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Compound Interest Calculator</h3>
+        <p>Investment growth with yearly table + Rule of 72.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="loan emi mortgage monthly payment amortization interest" href="tools/loan-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Loan / EMI Calculator</h3>
+        <p>Monthly payment + full amortization schedule.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="tip restaurant bill split per person gratuity" href="tools/tip-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Tip Calculator</h3>
+        <p>Presets, custom % and fair per-person splitting.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="discount sale price stacked off percentage savings" href="tools/discount-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Discount Calculator</h3>
+        <p>Real sale price — exposes the stacked-discount trap.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="age birthday how old exact years months days next birthday" href="tools/age-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Age Calculator</h3>
+        <p>Calendar-exact age plus next-birthday countdown.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="date difference days between deadlines weekdays business days duration" href="tools/date-difference-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Date Difference Calculator</h3>
+        <p>Days between dates, with business-day count.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="days until countdown since event deadline holiday birthday" href="tools/days-until-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>Days Until Calculator</h3>
+        <p>Live countdown to any date — weeks & workdays too.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="gpa grade point average college university weighted ap honors credits" href="tools/gpa-calculator/">
+        <span class="pill p-calc">Calculators</span><h3>GPA Calculator</h3>
+        <p>Semester GPA on the 4.0 scale with AP weighting.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="random number dice raffle pick range lottery generator" href="tools/random-number-generator/">
+        <span class="pill p-calc">Calculators</span><h3>Random Number Generator</h3>
+        <p>Cryptographic randomness, unique draws, dice rolls.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="unit convert length weight temperature data speed measurement metric imperial" href="tools/unit-converter/">
+        <span class="pill p-calc">Calculators</span><h3>Unit Converter</h3>
+        <p>Length, weight, temperature, data units & more.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="words to pages essay how many pages reading time speaking students double spaced" href="tools/words-to-pages/">
+        <span class="pill p-calc">Calculators</span><h3>Words to Pages Converter</h3>
+        <p>Pages from word count, reading & speaking times.</p><span class="go">→</span></a>
+      <a class="tool t-calc" data-cat="calc" data-kw="stopwatch timer laps split times milliseconds precise sport timing countdown" href="tools/stopwatch/">
+        <span class="pill p-calc">Calculators</span><h3>Online Stopwatch</h3>
+        <p>Millisecond precision, laps & splits, keyboard shortcuts.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="dev">
+    <div class="cat-head"><span class="bar" style="background:var(--dev)"></span><h2>🎵 Developer & Audio</h2><span class="desc">for builders, DJs & producers</span></div>
+    <div class="grid">
+      <a class="tool t-dev" data-cat="dev" data-kw="bpm tempo key detector song beat analyze dj harmonic mix camelot" href="tools/bpm-key-detector/">
+        <span class="pill p-dev">Star tool ★</span><h3>BPM & Key Detector</h3>
+        <p>Drop a track → tempo AND musical key, analyzed on-device.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="metronome click track practice bpm tap tempo time signature musician" href="tools/metronome/">
+        <span class="pill p-dev">Developer</span><h3>Online Metronome</h3>
+        <p>Drift-free click, tap tempo, subdivisions & beat dots.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="json format validate beautify minify pretty print lint" href="tools/json-formatter/">
+        <span class="pill p-dev">Developer</span><h3>JSON Formatter & Validator</h3>
+        <p>Pretty-print, minify and validate with clear errors.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="base64 encode decode btoa atob utf8 binary" href="tools/base64-encoder/">
+        <span class="pill p-dev">Developer</span><h3>Base64 Encoder / Decoder</h3>
+        <p>UTF-8 safe round-trips, URL-safe variant tolerant.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="uuid guid generate v4 random unique identifier bulk" href="tools/uuid-generator/">
+        <span class="pill p-dev">Developer</span><h3>UUID Generator</h3>
+        <p>Crypto-random v4 UUIDs, bulk mode.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="hash sha256 sha512 sha1 checksum digest file integrity" href="tools/hash-generator/">
+        <span class="pill p-dev">Developer</span><h3>Hash Generator</h3>
+        <p>SHA-1/256/384/512 digests via Web Crypto.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="timestamp unix epoch convert date time seconds seconds since 1970" href="tools/timestamp-converter/">
+        <span class="pill p-dev">Developer</span><h3>Timestamp Converter</h3>
+        <p>Unix epoch ↔ human date, live both directions.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="qr code wifi url static png svg scan never expires" href="tools/qr-code-generator/">
+        <span class="pill p-dev">Developer</span><h3>QR Code Generator</h3>
+        <p>Static codes that never expire — PNG & SVG out.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="password strength test secure check entropy crack time security audit" href="tools/password-strength-checker/">
+        <span class="pill p-dev">Developer</span><h3>Password Strength Checker</h3>
+        <p>Entropy, crack-time estimates, pattern warnings.</p><span class="go">→</span></a>
+      <a class="tool t-dev" data-cat="dev" data-kw="password generate random secure passphrase symbols strength crypto" href="tools/password-generator/">
+        <span class="pill p-dev">Developer</span><h3>Password Generator</h3>
+        <p>Crypto-random passwords with strength meter.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="writing">
+    <div class="cat-head"><span class="bar" style="background:var(--writing)"></span><h2>✍️ Writing & Text</h2><span class="desc">essays, posts & cleanup</span></div>
+    <div class="grid">
+      <a class="tool t-writing" data-cat="writing" data-kw="word count characters sentences reading time essay writing" href="tools/word-counter/">
+        <span class="pill p-writing">Writing</span><h3>Word Counter</h3>
+        <p>Words, characters, sentences & reading time live.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="case converter uppercase lowercase title camel snake pascal sentence" href="tools/case-converter/">
+        <span class="pill p-writing">Writing</span><h3>Case Converter</h3>
+        <p>7 formats from SHOUTY CAPS to camelCase.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="character limit counter twitter x instagram meta description sms seo" href="tools/character-limits/">
+        <span class="pill p-writing">Writing</span><h3>Character Limits Counter</h3>
+        <p>Fits X, meta description, SMS? Live as you type.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="text diff compare changes two texts highlight differences git" href="tools/text-diff/">
+        <span class="pill p-writing">Writing</span><h3>Text Diff Checker</h3>
+        <p>Git-style line comparison, real LCS algorithm.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="lorem ipsum placeholder dummy text paragraphs designer mockup" href="tools/lorem-ipsum-generator/">
+        <span class="pill p-writing">Writing</span><h3>Lorem Ipsum Generator</h3>
+        <p>Classic filler by paragraph, sentence or word.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="markdown html convert preview readme md renderer" href="tools/markdown-to-html/">
+        <span class="pill p-writing">Writing</span><h3>Markdown → HTML</h3>
+        <p>Live conversion with XSS-safe escaping.</p><span class="go">→</span></a>
+      <a class="tool t-writing" data-cat="writing" data-kw="repeat text emoji times duplicate spam filler copy" href="tools/text-repeater/">
+        <span class="pill p-writing">Writing</span><h3>Text Repeater</h3>
+        <p>Repeat up to ×1000 with separators & numbering.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="design">
+    <div class="cat-head"><span class="bar" style="background:var(--design)"></span><h2>🎨 Design</h2><span class="desc">colors & visuals</span></div>
+    <div class="grid">
+      <a class="tool t-design" data-cat="design" data-kw="color converter hex rgb hsl picker css palette design" href="tools/color-converter/">
+        <span class="pill p-design">Design</span><h3>Color Converter</h3>
+        <p>HEX ↔ RGB ↔ HSL with live swatch preview.</p><span class="go">→</span></a>
+      <a class="tool t-design" data-cat="design" data-kw="aspect ratio resize scale dimensions video image 16:9 shorts instagram" href="tools/aspect-ratio-calculator/">
+        <span class="pill p-design">Design</span><h3>Aspect Ratio Calculator</h3>
+        <p>Match any ratio without distorting the image.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="video">
+    <div class="cat-head"><span class="bar" style="background:var(--video)"></span><h2>🎬 Video</h2><span class="desc">subtitles & captions</span></div>
+    <div class="grid">
+      <a class="tool t-video" data-cat="video" data-kw="srt to vtt subtitles captions webvtt convert youtube" href="tools/srt-to-vtt/">
+        <span class="pill p-video">Video</span><h3>SRT → VTT Converter</h3>
+        <p>Subtitle conversion both ways, instant & local.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="data">
+    <div class="cat-head"><span class="bar" style="background:var(--data)"></span><h2>📊 Data</h2><span class="desc">spreadsheets & datasets</span></div>
+    <div class="grid">
+      <a class="tool t-data" data-cat="data" data-kw="csv json spreadsheet data convert array objects" href="tools/csv-to-json/">
+        <span class="pill p-data">Data</span><h3>CSV → JSON Converter</h3>
+        <p>The analyst's bridge between Excel and code.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <section class="cat-section" data-cat="health">
+    <div class="cat-head"><span class="bar" style="background:var(--health)"></span><h2>❤️ Health</h2><span class="desc">body & sleep</span></div>
+    <div class="grid">
+      <a class="tool t-health" data-cat="health" data-kw="bmi body mass index weight height healthy overweight who" href="tools/bmi-calculator/">
+        <span class="pill p-health">Health</span><h3>BMI Calculator</h3>
+        <p>Metric & imperial with WHO categories.</p><span class="go">→</span></a>
+      <a class="tool t-health" data-cat="health" data-kw="calorie tdee bmr maintenance deficit bulk weight loss metabolism diet" href="tools/calorie-calculator/">
+        <span class="pill p-health">Health</span><h3>Calorie Calculator (TDEE)</h3>
+        <p>Daily burn + cut/bulk targets, Mifflin-St Jeor.</p><span class="go">→</span></a>
+      <a class="tool t-health" data-cat="health" data-kw="sleep cycle bedtime wake up 90 minutes rem calculator when to sleep" href="tools/sleep-calculator/">
+        <span class="pill p-health">Health</span><h3>Sleep Calculator</h3>
+        <p>Best bedtimes around 90-minute sleep cycles.</p><span class="go">→</span></a>
+    </div>
+  </section>
+
+  <div id="noRes">😕 Nothing matches "<span id="noResQ"></span>". Try a shorter search or another category.</div>
+
+  <footer>
+    ⚙️ ToolForge — free browser tools · everything runs locally, nothing is uploaded<br>
+    <a href="https://github.com/gettoolforge/TOOLFORGE">GitHub repo</a> · built with plain HTML/JS · © 2026
+  </footer>
 </main>
 <script>
-const q=document.getElementById('q');
-const cards=[...document.querySelectorAll('#grid .tool')];
+const $=id=>document.getElementById(id);
 let activeCat='all';
-function apply(){
-  const needle=q.value.trim().toLowerCase();
-  let shown=0;
-  for(const c of cards){
-    const okCat=(activeCat==='all'||c.dataset.cat===activeCat);
-    const hay=(c.textContent+' '+(c.dataset.kw||'')).toLowerCase();
-    const okQ=!needle||hay.includes(needle);
-    const show=okCat&&okQ;
-    c.style.display=show?'':'none';
-    if(show)shown++;
-  }
-  document.getElementById('empty').style.display=shown?'none':'block';
-  document.getElementById('count').textContent=shown+' of '+cards.length+' tools';
+const chips=document.querySelectorAll('.chip');
+function applyFilters(){
+  const q=$('q').value.trim().toLowerCase();
+  let visible=0,total=0;
+  document.querySelectorAll('.tool').forEach(t=>{total++;});
+  // per-section handling
+  const sectionCounts={};
+  document.querySelectorAll('.tool').forEach(card=>{
+    const kw=(card.dataset.kw||'')+' '+card.querySelector('h3').textContent.toLowerCase();
+    const catOk=activeCat==='all'||card.dataset.cat===activeCat;
+    const qOk=!q||kw.includes(q);
+    const show=catOk&&qOk;
+    card.style.display=show?'':'none';
+    if(show){visible++;
+      // find its section
+      const sec=card.closest('.cat-section');
+      if(sec)sectionCounts[sec.dataset.cat]=(sectionCounts[sec.dataset.cat]||0)+1;
+    }
+  });
+  // hide empty sections (but only when searching/filtering)
+  const filtering=q||activeCat!=='all';
+  document.querySelectorAll('.cat-section').forEach(sec=>{
+    sec.style.display=filtering?(sectionCounts[sec.dataset.cat]?'':'none'):'';
+  });
+  // hide section headers when searching single match view? keep them — they give context.
+  $('count').textContent=filtering?('Showing '+visible+' of '+total+' tools'):'';
+  $('noRes').style.display=(filtering&&visible===0)?'block':'none';
+  $('noResQ').textContent=q;
 }
-q.addEventListener('input',apply);
-document.getElementById('chips').addEventListener('click',e=>{
-  const b=e.target.closest('.chip');
-  if(!b)return;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  b.classList.add('active');
-  activeCat=b.dataset.cat;
-  apply();
+chips.forEach(ch=>ch.addEventListener('click',()=>{
+  chips.forEach(c=>c.classList.remove('on'));
+  ch.classList.add('on');activeCat=ch.dataset.c;
+  applyFilters();
+}));
+$('q').addEventListener('input',applyFilters);
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&document.activeElement!==$('q')){e.preventDefault();$('q').focus();}
 });
-apply();
+applyFilters();
 </script>
 </body>
 </html>
