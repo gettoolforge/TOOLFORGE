@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VTT to SRT Converter — WebVTT to SubRip Instantly | ToolForge</title>
+<meta name="description" content="Free VTT to SRT converter: convert WebVTT subtitles to SubRip format instantly. Handles timestamps, cue settings and voice tags. 100% in your browser, no upload.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/vtt-to-srt/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"VTT to SRT Converter","applicationCategory":"MultimediaApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+  header .crumb{color:var(--mut);font-size:.95rem}
+  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+  label.drop{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px dashed #2b3342;border-radius:12px;padding:26px 16px;cursor:pointer;transition:.15s;text-align:center}
+  label.drop:hover,label.drop.over{border-color:var(--acc)}
+  input[type=file]{display:none}
+  textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;margin-top:10px}
+  button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+  button.ghost{background:#232a38;color:var(--text)}
+  #msg{margin-left:8px;color:var(--ok)}
+  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">VTT → SRT</span></header>
+  <p><span class="badge">Instant</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
+  <h1>VTT to SRT Converter</h1>
+  <p class="sub">Convert WebVTT subtitles to the universally-supported SubRip format — paste or drop a file.</p>
+
+  <div class="card">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".vtt,text/vtt">
+      <strong>📄 Drop a .vtt file here or click to choose</strong>
+      <span style="color:var(--mut);font-size:.88rem">…or just paste VTT text below</span>
+    </label>
+    <textarea id="in" placeholder="WEBVTT&#10;&#10;00:00:01.000 --> 00:00:04.000&#10;Hello world"></textarea>
+    <div style="margin-top:12px">
+      <button onclick="convert()">Convert to SRT</button>
+      <button class="ghost" onclick="downloadSrt()">Download .srt</button>
+      <button class="ghost" onclick="copyOut()">Copy</button>
+      <button class="ghost" onclick="clearAll()">Clear</button>
+      <span id="msg"></span>
+    </div>
+    <textarea id="out" placeholder="SRT output appears here…" style="min-height:170px"></textarea>
+  </div>
+
+  <h2>What gets converted</h2>
+  <ul>
+    <li><strong>Timestamps:</strong> <code>00:00:01.000 --&gt;</code> becomes <code>00:00:01,000 --&gt;</code> (comma milliseconds) with sequential cue numbering added.</li>
+    <li><strong>Cue settings</strong> like <code>align:start line:0%</code> are dropped (SRT doesn't support them).</li>
+    <li><strong>Voice tags</strong> like <code>&lt;v Roger&gt;</code> are stripped cleanly.</li>
+    <li><strong>NOTE blocks</strong> and the WEBVTT header are removed.</li>
+    <li>Basic <code>&lt;b&gt;&lt;i&gt;&lt;u&gt;</code> styling tags are kept (most SRT players render them).</li>
+  </ul>
+
+  <p class="muted">Part of ToolForge — free browser tools. Also available: <a href="../srt-to-vtt/" style="color:var(--acc2)">SRT → VTT</a>.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const drop=$('drop'),file=$('file');
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)readFile(f);});
+file.addEventListener('change',e=>{if(e.target.files&&e.target.files[0])readFile(e.target.files[0]);});
+function readFile(f){
+  const r=new FileReader();
+  r.onload=()=>{$('in').value=r.result;convert();};
+  r.readAsText(f);
+}
+function tsVttToSrt(ts){
+  // handles HH:MM:SS.mmm and MM:SS.mmm (short WebVTT form) -> HH:MM:SS,mmm
+  const parts=ts.trim().split(':');
+  if(parts.length>3||parts.length<2)return null;
+  const last=parts[parts.length-1];
+  const sp=last.split(/[.,]/);
+  if(sp.length<2||!/\d/.test(sp[0]))return null;
+  let h='00',m='00',s='00',ms='000';
+  if(parts.length===3){h=parts[0].padStart(2,'0');m=parts[1].padStart(2,'0');}
+  else{m=parts[0].padStart(2,'0');}
+  s=sp[0].padStart(2,'0');
+  ms=(sp[1]||'').padEnd(3,'0').slice(0,3);
+  if(!/^\d+$/.test(h)||!/^\d+$/.test(m)||!/^\d+$/.test(s))return null;
+  return h+':'+m+':'+s+','+ms;
+}
+function convert(){
+  const src=$('in').value;
+  if(!src.trim()){$('msg').textContent='⚠ Paste some VTT first';$('out').value='';return;}
+  // strip NOTE blocks
+  let text=src.replace(/^NOTE\s[\s\S]*?(?=\n\n|$)/gm,'');
+  const lines=text.split(/\r?\n/);
+  const out=[];
+  let n=0,inCue=false,cueBuf=[],cueStart=null;
+  const flushCue=()=>{
+    if(!cueBuf.length)return;
+    n++;
+    out.push(String(n));
+    out.push(cueBuf[0]);
+    for(let i=1;i<cueBuf.length;i++)out.push(cueBuf[i].replace(/<v[^>]*>/g,'').replace(/<\/v>/g,''));
+    out.push('');
+    cueBuf=[];inCue=false;
+  };
+  for(const raw of lines){
+    const line=raw.replace(/\s+$/,'');
+    if(/-->/.test(line)){
+      flushCue();
+      const parts=line.split('-->');
+      const start=tsVttToSrt(parts[0]);
+      // end part may carry cue settings after the timestamp
+      const endRaw=parts[1]||'';
+      const endMatch=endRaw.match(/[\d:,\.]+/);
+      const end=endMatch?tsVttToSrt(endMatch[0]):null;
+      if(start===null||end===null){$('msg').textContent='⚠ Couldn\'t parse a timestamp line';return;}
+      inCue=true;
+      cueBuf=[start+' --> '+end];
+      continue;
+    }
+    if(inCue){
+      if(line===''){flushCue();}
+      else cueBuf.push(line);
+    }
+  }
+  flushCue();
+  if(n===0){$('msg').textContent='⚠ No cues found — is this a VTT file?';return;}
+  $('out').value=out.join('\n');
+  $('msg').textContent='✓ '+n+' cues converted';
+}
+function downloadSrt(){
+  if(!$('out').value){$('msg').textContent='⚠ Nothing to download yet';return;}
+  const blob=new Blob([$('out').value],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(($('file').files[0]||{}).name||'subtitles.vtt').replace(/\.vtt$/i,'')+'.srt';
+  a.click();
+}
+async function copyOut(){
+  try{await navigator.clipboard.writeText($('out').value);$('msg').textContent='✓ Copied';}catch(e){}
+}
+function clearAll(){$('in').value='';$('out').value='';$('msg').textContent='';file.value='';}
+$('in').addEventListener('input',()=>{$('msg').textContent='';});
+</script>
+</body>
+</html>
