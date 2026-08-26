@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML to JSON Converter — Attributes & Nesting Handled | ToolForge</title>
+<meta name="description" content="Convert XML to JSON in your browser: attributes become @-keys, text goes to #text, nesting preserved. Free, instant, private.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/xml-to-json/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">XML → JSON</span></header>
+<p><span class="badge">Attributes preserved</span><span class="badge">Instant</span><span class="badge">Private</span><span class="badge">Free</span></p>
+<h1>XML to JSON</h1>
+<p class="sub">Paste XML — get structured JSON with attributes and text handled sensibly.</p>
+<div class="card">
+<textarea id="in" placeholder="<catalog><book id=&quot;1&quot;><title>XML Basics</title></book></catalog>"></textarea>
+<div style="margin:12px 0"><label><input type="checkbox" id="pretty" checked style="width:auto"> Pretty-print JSON output</label></div>
+<button onclick="go()">Convert</button><button class="ghost" onclick="copyO()">Copy</button><span id="msg"></span>
+<textarea id="out" readonly placeholder="JSON appears here…" style="margin-top:12px"></textarea>
+</div>
+<h2>Conversion rules</h2><ul><li>Attributes become keys prefixed with <code>@</code> (<code>@id</code>).</li><li>Element text lands in <code>#text</code> when attributes coexist; otherwise the element maps to its text directly.</li><li>Repeated sibling elements become arrays automatically.</li><li>Empty elements become <code>null</code>. Comments and processing instructions are skipped.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function tokenize(src){
+  // returns events: {type:'start'|'end'|'text', name, attrs, selfClose}
+  const ev=[];let i=0;
+  while(i<src.length){
+    if(src[i]==='<'){
+      if(src.startsWith('<!--',i)){const e=src.indexOf('-->',i);if(e<0)throw new Error('unterminated comment');i=e+3;continue;}
+      if(src.startsWith('<?',i)){const e=src.indexOf('?>',i);if(e<0)throw new Error('unterminated <?');i=e+2;continue;}
+      if(src.startsWith('</',i)){
+        const e=src.indexOf('>',i);if(e<0)throw new Error('bad closing tag');
+        ev.push({type:'end',name:src.slice(i+2,e).trim()});i=e+1;continue;}
+      const m=src.slice(i).match(/^<([A-Za-z_][\w.:-]*)/);
+      if(!m)throw new Error('bad tag near index '+i);
+      let j=i+m[0].length,inQ=null,selfClose=false;
+      while(j<src.length){
+        const c=src[j];
+        if(inQ){if(c===inQ)inQ=null;}
+        else if(c==='"'||c==="'")inQ=c;
+        else if(c==='>'){selfClose=src[j-1]==='/';break;}
+        j++;
+      }
+      const attrSrc=src.slice(i+m[0].length,selfClose?j-1:j);
+      const attrs={};
+      attrSrc.replace(/([\w:-]+)\s*=\s*("([^"]*)"|'([^']*)')/g,(w,k,v1,v2,v3)=>{attrs[k]=v2!==undefined?v2:v3;return w;});
+      ev.push({type:'start',name:m[1],attrs,selfClose});
+      i=j+1;continue;
+    }
+    const next=src.indexOf('<',i);
+    const txt=src.slice(i,next<0?src.length:next);
+    if(txt.trim())ev.push({type:'text',text:txt});
+    i=next<0?src.length:next;
+  }
+  return ev;
+}
+function xmlToJson(src){
+  const ev=tokenize(src);
+  let pos=0;
+  function parseNode(){
+    if(ev[pos].type!=='start')throw new Error('expected element, got '+ev[pos].type);
+    const node={};
+    const name=ev[pos].name;
+    for(const k in ev[pos].attrs)node['@'+k]=ev[pos].attrs[k];
+    pos++; // consume start
+    const textParts=[];
+    while(pos<ev.length){
+      const e=ev[pos];
+      if(e.type==='end'){pos++;break;}
+      if(e.type==='text'){textParts.push(e.text);pos++;continue;}
+      // child element
+      const childName=e.name;
+      const child=parseNode();
+      if(node[childName]===undefined)node[childName]=child;
+      else if(Array.isArray(node[childName]))node[childName].push(child);
+      else node[childName]=[node[childName],child];
+    }
+    const keys=Object.keys(node).filter(k=>k!=='#text');
+    const text=textParts.join(' ').trim();
+    if(keys.length===0&&Object.keys(node).some(k=>k==='#text'))return text; // pure text element
+    if(keys.length===0&&Object.keys(node).length===0)return text||null;
+    if(text)node['#text']=text;
+    return node;
+  }
+  const rootName=ev[0]&&ev[0].name;
+  if(!rootName)throw new Error('no root element found');
+  const content=parseNode();
+  const out={};
+  out[rootName]=content;
+  return out;
+}
+function go(){
+  try{
+    const obj=xmlToJson(in.value);
+    out.value=JSON.stringify(obj,null,pretty.checked?2:0);
+    msg.textContent='✓ Converted';msg.className='ok';
+  }catch(e){msg.textContent='✗ '+e.message;msg.className='';}
+}
+async function copyO(){try{await navigator.clipboard.writeText(out.value);}catch(e){}}
+</script>
+</body>
+</html>

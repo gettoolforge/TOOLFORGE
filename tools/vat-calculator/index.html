@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAT Calculator — Add or Remove VAT (ALV) | ToolForge</title>
+<meta name="description" content="Free VAT calculator: add VAT to a net price or remove it from a gross price. Presets for Finnish ALV 25.5%, EU rates, and custom percentages. Reverse calculation included.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/vat-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">VAT Calculator</span></header>
+<p><span class="badge">Reverse mode</span><span class="badge">FI 25.5% preset</span><span class="badge">EU rates</span><span class="badge">Free</span></p>
+<h1>VAT / ALV Calculator</h1>
+<p class="sub">Add VAT to net prices, or extract it from gross prices (reverse calculation).</p>
+<div class="card">
+<div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+<label><input type="radio" name="mode" value="add" checked style="width:auto"> Add VAT to net</label>
+<label><input type="radio" name="mode" value="remove" style="width:auto"> Extract VAT from gross</label>
+</div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap">
+<label>Amount <input type="number" id="amt" value="100" min="0" step="any" style="width:110px"></label>
+<label>Rate %
+<select id="rate"><option>25.5</option><option>24</option><option>14</option><option>14.4</option><option>10</option><option>20</option><option>21</option><option>19</option><option>custom</option></select>
+<input type="number" id="customRate" placeholder="%" min="0" step="any" style="width:76px;display:none"></label>
+</div>
+<div id="res" style="margin-top:18px;font-size:1.05rem;line-height:2.1;text-align:left;max-width:380px;margin-left:auto;margin-right:auto"></div>
+</div>
+<h2>Finnish ALV rates (2026)</h2><ul><li><strong>25.5%</strong> general rate (raised from 24% in Sept 2024)</li><li><strong>14%</strong> food, restaurant, transport, books</li><li><strong>10%</strong> medicines, books (reduced), entertainment</li><li>Reverse-VAT (extracting VAT from a gross price) is what you need when an invoice shows one total including VAT.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function currentRate(){return $('customRate').style.display!=='none'&&customRate.value!==''?+customRate.value:+$('rateSel').value;}
+function calc(){
+  const amt=parseFloat($('amount').value)||0;
+  const r=$('rateSel').value==='custom'?parseFloat(document.getElementById('customRate').value)||0:+$('rateSel').value;
+  const mode=document.querySelector('input[name=mode]:checked').value;
+  const f=n=>n.toFixed(2);
+  let net,vat,gross;
+  if(mode==='add'){net=amt;vat=net*r/100;gross=net+vat;}
+  else{gross=amt;net=gross/(1+r/100);vat=gross-net;}
+  $('net').textContent=f(net);$('vat').textContent=f(vat);$('gross').textContent=f(gross);
+}
+['amount'].forEach(()=>{});
+document.querySelectorAll('input[name=mode]').forEach(r=>r.addEventListener('change',calc));
+document.getElementById('amount').addEventListener('input',calc);
+$('rateSel').addEventListener('change',()=>{
+  document.getElementById('customRate').style.display=$('rateSel').value==='custom'?'inline-block':'none';
+  calc();
+});
+document.getElementById('customRate').addEventListener('input',calc);
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Water Intake Calculator — How Much Should You Drink | ToolForge</title>
+<meta name="description" content="Free daily water intake calculator: personalized hydration target from your weight, activity level and climate. General guidance, instant results.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/water-intake/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Water Intake</span></header>
+<p><span class="badge">Activity & climate</span><span class="badge">Exercise bonus</span><span class="badge">Free</span></p>
+<h1>Water Intake Calculator</h1>
+<p class="sub">A sensible daily hydration target based on weight, exercise and climate.</p>
+<div class="card">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+<label>Weight <input type="number" id="kg" value="70" min="30" step="any" style="width:90px"> kg</label>
+<label>Exercise <select id="ex"><option value="0">None today</option><option value="30">~30 min</option><option value="60" selected>~1 hour</option><option value="90">90+ min</option></select></label>
+<label>Climate <select id="clim"><option value="0">Temperate</option><option value="250">Warm</option><option value="500">Hot / humid</option></select></label>
+</div>
+<div id="res" style="font-size:2.4rem;font-weight:800;color:var(--ok);margin-top:16px;min-height:1.4em"></div>
+<div id="glasses" style="color:var(--mut)"></div>
+</div>
+<h2>Honest guidance</h2><ul><li>Base rule of thumb: ~33 ml per kg bodyweight per day (≈2.3 L for 70 kg).</li><li>Add ~350–500 ml per 30 min of exercise, more in heat.</li><li>Food provides ~20% of fluid intake; thirst is a fine guide for most healthy people.</li><li>General info only — kidney or heart conditions need medical advice.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calc(){
+  const kg=parseFloat(kgw.value)||0,mins=+ex.value,clim=+clima.value;
+  if(kg<=0){res.textContent='';glasses.textContent='';return;}
+  let ml=kg*33;
+  ml+=mins/30*400;
+  ml+=clim;
+  const L=(ml/1000).toFixed(2);
+  res.textContent=L+' L / day';
+  glasses.textContent='≈ '+Math.round(ml/250)+' glasses of 250 ml';
+}
+['kgw','ex','clima'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

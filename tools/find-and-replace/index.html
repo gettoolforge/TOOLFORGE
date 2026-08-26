@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find and Replace Text — Literal or Regex, Bulk | ToolForge</title>
+<meta name="description" content="Free find and replace tool for text: literal or regex patterns, case-sensitive option, whole-word matching, live match count. Runs entirely in your browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/find-and-replace/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Find & Replace</span></header>
+<p><span class="badge">Regex mode</span><span class="badge">Case sensitive</span><span class="badge">Whole words</span><span class="badge">Live count</span></p>
+<h1>Find & Replace</h1>
+<p class="sub">Bulk find-and-replace with regex power when you need it.</p>
+<div class="card">
+<textarea id="txt" placeholder="Paste your text here…" style="min-height:170px"></textarea>
+<div style="display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;align-items:center">
+<input type="text" id="find" placeholder="Find…" style="flex:1;min-width:180px">
+<input type="text" id="rep" placeholder="Replace with…" style="flex:1;min-width:180px">
+</div>
+<div style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap">
+<label><input type="checkbox" id="regex" style="width:auto"> Regular expression</label>
+<label><input type="checkbox" id="case" style="width:auto"> Case sensitive</label>
+<label><input type="checkbox" id="whole" style="width:auto"> Whole words only</label>
+</div>
+<button onclick="go()">Replace all</button><button class="ghost" onclick="undo()">Undo</button><button class="ghost" onclick="clearBoth()">Clear</button><span id="msg" class="ok"></span>
+<textarea id="out" readonly placeholder="Result appears here…" style="margin-top:12px"></textarea>
+</div>
+<h2>Regex examples</h2><ul><li>Delete blank lines: enable regex, find <code>\n\s*\n</code> replace <code>\n\n</code></li><li>Swap first/last name: find <code>(\w+) (\w+)</code> replace <code>$2 $1</code></li><li>Trim trailing spaces: find <code>[ \t]+$</code> replace empty</li><li>Whole-words mode wraps your term in <code>\b…\b</code> so “cat” won’t hit “category”.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let backup='';
+function buildRx(){
+  const f=find.value;
+  if(!f)return null;
+  let pattern=regex.checked?f:f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  if(whole.checked&&!regex.checked)pattern='\\b'+pattern+'\\b';
+  try{return new RegExp(pattern,caseS.checked?'g':'gi');}
+  catch(e){msg.textContent='✗ Bad regex: '+e.message;msg.className='';return null;}
+}
+function go(){
+  const src=txt.value;
+  if(!find.value){msg.textContent='⚠ Enter something to find';msg.className='';return;}
+  const rx=buildRx();
+  if(!rx){msg.className='';return;}
+  backup=src;
+  let count=0;
+  const result=src.replace(rx,()=>{count++;return rep.value;});
+  out.value=result;
+  msg.textContent='✓ '+count+' replacement'+(count===1?'':'s');
+  msg.className='ok';
+}
+function undo(){if(backup){txt.value=backup;out.value='';msg.textContent='✓ Undone';}}
+function clearBoth(){txt.value='';out.value='';find.value='';rep.value='';msg.textContent='';}
+['find','rep','regex','caseS','whole'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{msg.textContent='';}));
+go();
+</script>
+</body>
+</html>

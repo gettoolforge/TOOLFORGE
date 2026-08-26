@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL Formatter — Beautify Queries Instantly | ToolForge</title>
+<meta name="description" content="Free online SQL formatter: uppercase keywords, break clauses onto lines, indent properly. Works with SELECT/INSERT/UPDATE/DELETE. Private, no signup.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/sql-formatter/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">SQL Formatter</span></header>
+<p><span class="badge">Keyword casing</span><span class="badge">Clause breaks</span><span class="badge">Private</span><span class="badge">Free</span></p>
+<h1>SQL Formatter</h1>
+<p class="sub">Messy one-line queries in — clean, indented, readable SQL out.</p>
+<div class="card">
+<textarea id="in" placeholder="select id, name, email from users where active = 1 order by created_at desc limit 10"></textarea>
+<div style="margin:12px 0"><label><input type="checkbox" id="upper" checked style="width:auto"> UPPERCASE keywords</label>&nbsp;&nbsp;<label><input type="checkbox" id="breaks" checked style="width:auto"> New line per clause</label></div>
+<button onclick="fmt()">Format</button><button class="ghost" onclick="navigator.clipboard.writeText(in.value)">Copy</button><span id="msg" class="ok"></span>
+</div>
+<h2>Supported statements</h2><ul><li><strong>SELECT</strong>: FROM, JOINs (kept with their ON), WHERE, GROUP BY, HAVING, ORDER BY, LIMIT.</li><li><strong>INSERT INTO … VALUES</strong>, <strong>UPDATE … SET … WHERE</strong>, <strong>DELETE FROM … WHERE</strong>.</li><li>Strings in quotes are never touched; keywords inside string literals stay lowercase.</li><li>This is a pragmatic beautifier for everyday queries, not a full parser for stored procedures.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const KW=['SELECT','FROM','WHERE','GROUP BY','HAVING','ORDER BY','LIMIT','OFFSET','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','JOIN','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','FULL JOIN','ON','AND','OR','UNION ALL','UNION'];
+const BREAK=['FROM','WHERE','GROUP BY','HAVING','ORDER BY','LIMIT','OFFSET','VALUES','SET','LEFT JOIN','RIGHT JOIN','INNER JOIN','FULL JOIN','UNION ALL','UNION'];
+function fmtSql(sql,upper,breaks){
+  // protect quoted strings
+  const strs=[];let s=sql.replace(/'(?:[^']|'')*'/g,m=>{strs.push(m);return '\u0000'+(strs.length-1)+'\u0000';});
+  if(upper)s=s.replace(new RegExp('\\b('+KW.join('|')+')\\b','gi'),m=>m.toUpperCase());
+  if(breaks){
+    // newline BEFORE breaking keywords
+    const rx=new RegExp('\\b('+BREAK.join('|')+')\\b','g');
+    s=s.replace(rx,'\n'+m=>m.toUpperCase());
+    s=s.replace(rx,m=>'\n'+m);
+    s=s.replace(/\n+/g,'\n').split('\n').map(line=>{
+      const t=line.trim();
+      if(/^(AND|OR|ON)\b/.test(t.toUpperCase()))return '   '+t;
+      return t;
+    }).join('\n');
+  }else if(upper){/* already uppercased */}
+  // restore strings
+  s=s.replace(/\u0000(\d+)\u0000/g,(w,i)=>strs[+i]);
+  return s;
+}
+function fmt(){
+  const src=in.value.trim();
+  if(!src){msg.textContent='⚠ Paste SQL first';msg.className='';return;}
+  in.value=fmtSql(src,upper.checked,breaks.checked);
+  msg.textContent='✓ Formatted';
+}
+</script>
+</body>
+</html>

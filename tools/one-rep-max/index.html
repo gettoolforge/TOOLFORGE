@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Rep Max Calculator — 1RM From Any Weight × Reps | ToolForge</title>
+<meta name="description" content="Free one rep max calculator: estimate your 1RM from any weight × reps combo using Epley, Brzycki and Lombardi formulas, plus percentage training tables.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/one-rep-max/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">One-Rep Max</span></header>
+<p><span class="badge">3 formulas</span><span class="badge">Training table</span><span class="badge">Free</span></p>
+<h1>One Rep Max Calculator</h1>
+<p class="sub">Enter a weight and the reps you managed — get your estimated 1RM and a training-percentage table.</p>
+<div class="card">
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px">
+<label>Weight lifted <input type="number" id="w" value="100" min="1" step="any" style="width:92px"></label>
+<label>Unit <select id="unit"><option value="kg">kg</option><option value="lb">lb</option></select></label>
+<label>Reps <input type="number" id="r" value="5" min="1" max="20" style="width:64px"></label>
+</div>
+<div id="res" style="font-size:2.2rem;font-weight:800;color:var(--ok);min-height:1.3em"></div>
+<table style="width:100%;max-width:480px;margin:16px auto 0;border-collapse:collapse;font-size:.92rem" id="tbl"></table>
+</div>
+<h2>The formulas</h2><ul><li><strong>Epley:</strong> w × (1 + reps/30) — the most common general-purpose estimate.</li><li><strong>Brzycki:</strong> w × 36/(37 − reps) — tends to read slightly lower at higher reps.</li><li><strong>Lombardi:</strong> w × reps^0.10.</li><li>All formulas are estimates that drift above ~10 reps; test true 1RMs safely with a spotter.</li><li>%-table: use 80–90% for strength blocks, 65–75% for hypertrophy volume work.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calc(w,r){
+  return {
+    epley:w*(1+r/30),
+    brzycki:w*36/(37-r),
+    lombardi:w*Math.pow(r,0.10)
+  };
+}
+function render(){
+  const w=+wgt.value,r=+reps.value,u=unit.value;
+  if(!(w>0)||!(r>=1)){res.textContent='';tbl.innerHTML='';return;}
+  if(r>20){res.textContent='Estimates unreliable past 20 reps';tbl.innerHTML='';return;}
+  const c=calc(w,r);
+  const best=Math.max(c.epley,c.brzycki,c.lombardi);
+  res.textContent=Math.round(best)+' '+u;
+  const pcts=[[95,'Strength peak'],[90,'Strength'],[85,'Power'],[80,'Strength-hypertrophy'],[70,'Hypertrophy'],[60,'Volume/endurance']];
+  tbl.innerHTML='<tr style="color:var(--mut)"><th style="text-align:left">% of 1RM</th><th style="text-align:right">Weight</th><th style="text-align:left;padding-left:14px">Purpose</th></tr>'+
+    pcts.map(([p,label])=>'<tr><td>'+p+'%</td><td style="text-align:right">'+Math.round(best*p/100)+' '+u+'</td><td style="padding-left:14px;color:var(--mut)">'+label+'</td></tr>').join('');
+}
+['wgt','reps','unit'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+render();
+</script>
+</body>
+</html>
