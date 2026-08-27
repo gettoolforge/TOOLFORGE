@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salary to Hourly Calculator — Annual ↔ Hourly Pay | ToolForge</title>
+<meta name="description" content="Free salary converter: annual salary to hourly wage and back, adjusted for hours per week and weeks per year. Monthly, weekly, daily breakdowns included.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/salary-hourly-converter/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Salary ↔ Hourly</span></header>
+<p><span class="badge">Both directions</span><span class="badge">Hours & weeks editable</span><span class="badge">Full breakdown</span><span class="badge">Free</span></p>
+<h1>Salary ↔ Hourly Converter</h1>
+<p class="sub">Convert between annual salary and hourly wage — with monthly, weekly & daily views.</p>
+<div class="card">
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+<label>Annual €/$(k) <input type="number" id="ann" value="52000" min="0" step="any" style="width:110px"></label>
+</div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+<label>Hours/week <input type="number" id="hpw" value="37.5" min="1" step="any" style="width:80px"></label>
+<label>Weeks/year <input type="number" id="wpy" value="52" min="1" max="52" step="any" style="width:80px"></label>
+</div>
+<div id="out" style="max-width:420px;margin:0 auto;font-size:1.05rem;line-height:2.2"></div>
+<div style="display:flex;gap:10px;justify-content:center;margin-top:10px">
+<label>Or hourly → <input type="number" id="hourly" placeholder="€/h" min="0" step="any" style="width:90px"></label>
+</div>
+</div>
+<h2>Notes</h2><ul><li>37.5 h/week × 52 weeks is a common European office baseline; 40×52 in the US.</li><li>The hourly figure is gross (before tax). Paid vacation means your "effective" hourly rate is the same — you just work fewer weeks.</li><li>Quick mental math: annual ÷ 2000 ≈ hourly at 40 h/week.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function fmt(n){return n.toLocaleString('en-US',{maximumFractionDigits:2});}
+function fromAnnual(){
+  const a=parseFloat(document.getElementById('ann').value)||0;
+  const hpw=parseFloat(document.getElementById('hpw').value)||37.5;
+  const wpy=parseFloat(document.getElementById('wpy').value)||52;
+  if(!(a>0)){document.getElementById('out').innerHTML='';return;}
+  const hours=hpw*wpy;
+  const hourly=a/hours;
+  document.getElementById('hourly').value=hourly.toFixed(2);
+  render(a,hourly,hpw,wpy);
+}
+function fromHourly(){
+  const h=parseFloat(document.getElementById('hourly').value);
+  const hpw=parseFloat(document.getElementById('hpw').value)||37.5;
+  const wpy=parseFloat(document.getElementById('wpy').value)||52;
+  if(isNaN(h)||!(h>0)){return;}
+  const a=h*hpw*wpy;
+  document.getElementById('ann').value=Math.round(a);
+  render(a,h,hpw,wpy);
+}
+function render(a,hourly,hpw,wpy){
+  document.getElementById('out').innerHTML=
+    '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Hourly</span><b>'+fmt(hourly)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Daily ('+hpw+' h)</span><b>'+fmt(hourly*hpw)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Weekly</span><b>'+fmt(hourly*hpw)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Monthly</span><b>'+fmt(a/12)+'</b></div>'+
+    '<div style="display:flex;justify-content:space-between"><span style="color:var(--mut)">Annual</span><b style="color:var(--ok)">'+fmt(a)+'</b></div>';
+}
+['ann','hpw','wpy'].forEach(id=>document.getElementById(id).addEventListener('input',fromAnnual));
+document.getElementById('hourly').addEventListener('input',fromHourly);
+fromAnnual();
+</script>
+</body>
+</html>

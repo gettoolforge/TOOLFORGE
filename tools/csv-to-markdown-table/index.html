@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSV to Markdown Table Converter — Paste & Convert | ToolForge</title>
+<meta name="description" content="Free CSV to markdown table converter: paste CSV data, get a GitHub-flavored markdown table with aligned columns. Custom delimiter support. In-browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/csv-to-markdown-table/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">CSV → Markdown</span></header>
+<p><span class="badge">GitHub-flavored</span><span class="badge">Custom delimiter</span><span class="badge">Header toggle</span><span class="badge">Free</span></p>
+<h1>CSV → Markdown Table</h1>
+<p class="sub">Paste CSV — get a clean markdown table ready for GitHub, Notion or docs.</p>
+<div class="card">
+<textarea id="in" placeholder="name,role,team&#10;Ada,engineer,core&#10;Grace,admiral,navy"></textarea>
+<div style="display:flex;gap:14px;margin:12px 0;flex-wrap:wrap;align-items:center">
+<label>Delimiter <select id="delim"><option value=",">Comma</option><option value=";">Semicolon</option><option value="	">Tab</option><option value="|">Pipe</option></select></label>
+<label><input type="checkbox" id="header" checked style="width:auto"> First row is header</label>
+<label><input type="checkbox" id="align" style="width:auto"> Pad columns for alignment</label>
+</div>
+<button onclick="go()">Convert</button><button class="ghost" onclick="copyO()">Copy markdown</button><span id="msg" class="ok"></span>
+<textarea id="out" readonly placeholder="Markdown table appears here…" style="margin-top:12px;min-height:160px"></textarea>
+</div>
+<h2>Notes</h2><ul><li>Output is GitHub-flavored markdown (GFM) — renders on GitHub, GitLab, Notion, Obsidian, most docs tools.</li><li>Quoted CSV fields (<code>"a, b"</code>) are parsed correctly; pipes inside cells are escaped as <code>\|</code>.</li><li>Column padding is cosmetic — markdown renders identically, but source looks tidy in diffs.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>const msg=document.getElementById('msg');
+const align=document.getElementById('align');
+const out=document.getElementById('out');
+const inEl=document.getElementById('in');
+
+const $=id=>document.getElementById(id);
+function parseCsvLine(line,d){
+  const cells=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(inQ){
+      if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++;}else inQ=false;}
+      else cur+=ch;
+    }else{
+      if(ch==='"')inQ=true;
+      else if(ch===d){cells.push(cur);cur='';}
+      else cur+=ch;
+    }
+  }
+  cells.push(cur);
+  return cells;
+}
+function go(){
+  const d=document.getElementById('delim').value==='\t'?'\t':document.getElementById('delim').value;
+  const src=inEl.value.replace(/\r/g,'');
+  if(!src.trim()){msg.textContent='⚠ Paste CSV first';msg.className='';return;}
+  const rows=src.split('\n').filter(l=>l.length).map(l=>parseCsvLine(l,d));
+  if(!rows.length){return;}
+  const nCols=Math.max(...rows.map(r=>r.length));
+  rows.forEach(r=>{while(r.length<nCols)r.push('');});
+  const esc=c=>c.replace(/\|/g,'\\|').trim();
+  const widths=rows[0].map((_,i)=>Math.max(...rows.map(r=>esc(r[i]).length)));
+  const mkRow=(r,pad)=>'| '+r.map((c,i)=>{const e=esc(c);return pad?e+' '.repeat(widths[i]-e.length):e;}).join(' | ')+' |';
+  const sep='| '+widths.map(w=>'-'.repeat(Math.max(3,w))).join(' | ')+' |';
+  let md='';
+  if(document.getElementById('header').checked){
+    md=mkRow(rows[0],align.checked)+'\n'+sep+'\n'+rows.slice(1).map(r=>mkRow(r,align.checked)).join('\n');
+  }else{
+    md=sep+'\n'+rows.map(r=>mkRow(r,align.checked)).join('\n');
+  }
+  out.value=md;
+  msg.textContent='✓ '+rows.length+' rows × '+nCols+' cols';msg.className='ok';
+}
+async function copyO(){try{await navigator.clipboard.writeText(out.value);msg.textContent='✓ Copied';msg.className='ok';}catch(e){}}
+document.getElementById('in').addEventListener('input',go);
+go();
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PX to REM Converter — px ↔ rem ↔ em with Root Size | ToolForge</title>
+<meta name="description" content="Free px to rem converter: convert pixels to rem/em and back with adjustable root font size. Includes a common-size reference table for 4px-scale design systems.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/pixel-to-rem/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">PX ↔ REM</span></header>
+<p><span class="badge">Two-way</span><span class="badge">Root size</span><span class="badge">16px table</span><span class="badge">Free</span></p>
+<h1>PX ↔ REM Converter</h1>
+<p class="sub">Convert px ↔ rem ↔ em with your root font size — both directions live.</p>
+<div class="card">
+<div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+<label>Root size <input type="number" id="root" value="16" min="1" step="any" style="width:70px"> px</label>
+</div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap">
+<label>PX <input type="number" id="px" value="24" min="0" step="any" style="width:96px"></label>
+<span style="color:var(--mut)">⇄</span>
+<label>REM <input type="number" id="rem" value="1.5" min="0" step="any" style="width:96px"></label>
+</div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap">
+<label>EM (at 16px context) <input type="number" id="em" value="1.5" min="0" step="any" style="width:96px"></label>
+</div>
+<h3 style="font-size:.85rem;color:var(--mut);margin:20px 0 8px">COMMON SIZES (root 16)</h3>
+<table id="tbl" style="width:100%;max-width:420px;margin:0 auto;border-collapse:collapse;font-size:.9rem"></table>
+</div>
+<h2>Why rem</h2><ul><li><code>rem</code> scales with the user's browser font setting — respecting accessibility. <code>px</code> ignores it.</li><li><code>em</code> is relative to the PARENT element's font size (compounds when nested); <code>rem</code> is always relative to the root — predictable.</li><li>Rule of thumb: font sizes & spacing in rem, fine borders/details in px.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function fmt(n){return parseFloat(n.toFixed(4)).toString();}
+function fromPx(){
+  const r=parseFloat(document.getElementById('root').value)||16;
+  const v=parseFloat(document.getElementById('px').value);
+  if(isNaN(v)){return;}
+  document.getElementById('rem').value=fmt(v/r);
+  document.getElementById('em').value=fmt(v/16);
+}
+function fromRem(){
+  const r=parseFloat(document.getElementById('root').value)||16;
+  const v=parseFloat(document.getElementById('rem').value);
+  if(isNaN(v)){return;}
+  document.getElementById('px').value=fmt(v*r);
+  document.getElementById('em').value=fmt(v*r/16);
+}
+function fromEm(){
+  const v=parseFloat(document.getElementById('em').value);
+  const r=parseFloat(document.getElementById('root').value)||16;
+  if(isNaN(v)){return;}
+  document.getElementById('px').value=fmt(v*16);
+  document.getElementById('rem').value=fmt(v*16/r);
+}
+['px','root'].forEach(id=>document.getElementById(id).addEventListener('input',fromPx));
+document.getElementById('rem').addEventListener('input',fromRem);
+document.getElementById('em').addEventListener('input',fromEm);
+document.getElementById('root').addEventListener('input',()=>{fromPx();fillTbl();});
+function fillTbl(){
+  const r=parseFloat(document.getElementById('root').value)||16;
+  const sizes=[12,14,16,18,20,24,32,40,48,64];
+  document.getElementById('tbl').innerHTML='<tr style="color:var(--mut)"><th style="text-align:left">px</th><th style="text-align:right">rem</th></tr>'+
+    sizes.map(p=>'<tr><td>'+p+'</td><td style="text-align:right;font-family:ui-monospace">'+fmt(p/r)+'</td></tr>').join('');
+}
+fillTbl();
+</script>
+</body>
+</html>

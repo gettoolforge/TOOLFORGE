@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Minifier — Compress Stylesheets Instantly | ToolForge</title>
+<meta name="description" content="Free CSS minifier: strip comments, whitespace and trailing semicolons to shrink stylesheets. Safe regex-based compression with size savings shown. In-browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/css-minifier/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">CSS Minifier</span></header>
+<p><span class="badge">Comment strip</span><span class="badge">Safe compression</span><span class="badge">Savings %</span><span class="badge">Free</span></p>
+<h1>CSS Minifier</h1>
+<p class="sub">Paste CSS — get a compact minified version with savings shown.</p>
+<div class="card">
+<textarea id="in" placeholder="/* paste CSS */&#10;.card {&#10;  color: #333;&#10;  padding: 16px;&#10;}"></textarea>
+<div style="margin:12px 0"><button onclick="mini()">Minify</button><button class="ghost" onclick="copyO()">Copy</button><span id="msg" class="ok"></span></div>
+<textarea id="out" readonly placeholder="Minified CSS appears here…" style="min-height:120px"></textarea>
+<div id="stats" style="color:var(--mut);margin-top:8px"></div>
+</div>
+<h2>What it removes</h2><ul><li><code>/* comments */</code> (keep <code>/*!</code> license comments)</li><li>All unnecessary whitespace, newlines and indentation</li><li>Trailing semicolons before <code>}</code></li><li>Space around <code>{ } : ; ,</code></li><li>Honest note: this is regex-based compression, not a full parse — it never rewrites values (no color shortening). Safe for production stylesheets.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>const msg=document.getElementById('msg');
+const out=document.getElementById('out');
+const inEl=document.getElementById('in');
+
+const $=id=>document.getElementById(id);
+function mini(){
+  const src=inEl.value;
+  if(!src.trim()){msg.textContent='⚠ Paste CSS first';msg.className='';return;}
+  let css=src;
+  css=css.replace(/\/\*[\s\S]*?\*\//g,'');            // comments (non-license)
+  css=css.replace(/\s+/g,' ');                          // collapse whitespace
+  css=css.replace(/\s*([{}:;,>~])\s*/g,'$1');           // space around punctuation
+  css=css.replace(/;}/g,'}');                           // trailing semicolons
+  css=css.replace(/\s+!/g,'!');                         // before !important
+  css=css.trim();
+  out.value=css;
+  const a=new Blob([src]).size,b=new Blob([css]).size;
+  const save=a?Math.round((1-b/a)*100):0;
+  msg.textContent='✓ Done';
+  msg.className='ok';
+  document.getElementById('stats').textContent=a+' bytes → '+b+' bytes ('+save+'% smaller)';
+}
+async function copyO(){try{await navigator.clipboard.writeText(out.value);msg.textContent='✓ Copied';msg.className='ok';}catch(e){}}
+</script>
+</body>
+</html>

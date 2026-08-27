@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calorie Burn Calculator — Calories Burned by Exercise | ToolForge</title>
+<meta name="description" content="Free calorie burn calculator: estimate calories burned walking, running, cycling, swimming and 20+ more activities using MET values, your weight and duration.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/calorie-burn-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Calorie Burn</span></header>
+<p><span class="badge">20+ activities</span><span class="badge">MET science</span><span class="badge">Weight-adjusted</span><span class="badge">Free</span></p>
+<h1>Calorie Burn Calculator</h1>
+<p class="sub">Pick an activity, add weight & duration — see calories burned.</p>
+<div class="card">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+<label>Activity <select id="act" style="max-width:280px"></select></label>
+<label>Weight <input type="number" id="kg" value="70" min="30" step="any" style="width:90px"> kg</label>
+<label>Duration <input type="number" id="min" value="30" min="1" style="width:80px"> minutes</label>
+</div>
+<div id="res" style="text-align:center;font-size:2.2rem;font-weight:800;color:var(--ok);margin-top:16px;min-height:1.3em"></div>
+<div id="note" style="text-align:center;color:var(--mut);font-size:.88rem"></div>
+</div>
+<h2>How it works (MET)</h2><ul><li><strong>MET</strong> = Metabolic Equivalent of Task: 1 MET = energy cost of sitting still (~1 kcal/kg/hour).</li><li>Formula: <code>kcal = MET × weight(kg) × hours</code>. Brisk walking ≈ 4.3 MET, running 10 km/h ≈ 10 MET, cycling moderate ≈ 8 MET.</li><li>Estimates assume average fitness & terrain; fitness trackers may differ ±20%. Good enough to compare activities and set expectations.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const ACTS=[
+ ['Walking (5 km/h)',4.3],['Walking brisk (6.5 km/h)',5.0],['Jogging (8 km/h)',8.3],
+ ['Running (10 km/h)',9.8],['Running (12 km/h)',11.8],['Cycling (16-19 km/h)',8.0],
+ ['Cycling (20-25 km/h)',10.0],['Swimming (moderate)',8.3],['Rowing machine',7.0],
+ ['Weight training (moderate)',3.5],['Weight training (hard)',6.0],['HIIT',8.0],
+ ['Yoga',2.5],['Pilates',3.0],['Elliptical',5.0],['Stair climbing',8.8],
+ ['Jump rope',12.3],['Boxing (bag)',5.5],['Dancing',4.8],['Hiking',6.0],
+ ['Soccer',7.0],['Basketball',6.5],['Tennis',7.3],['Skiing (downhill)',5.3],
+ ['House cleaning',3.3],['Gardening',3.8],['Standing work',1.8]
+];
+const sel=document.getElementById('act');
+sel.innerHTML=ACTS.map(([n],i)=>'<option value="'+i+'">'+n+'</option>').join('');
+function calc(){
+  const met=ACTS[+sel.value][1];
+  const kg=parseFloat(document.getElementById('kg').value)||0;
+  const mins=parseFloat(document.getElementById('min').value)||0;
+  if(!(kg>0)||!(mins>0)){document.getElementById('res').textContent='';return;}
+  const kcal=met*kg*(mins/60);
+  document.getElementById('res').textContent=Math.round(kcal)+' kcal';
+  document.getElementById('note').textContent='MET '+met+' × '+kg+' kg × '+(mins/60)+' h';
+}
+['act','kg','min'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+sel.addEventListener('change',calc);
+calc();
+</script>
+</body>
+</html>

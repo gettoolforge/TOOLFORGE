@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protein Calculator — Daily Protein Target for Your Goal | ToolForge</title>
+<meta name="description" content="Free protein calculator: daily protein target from body weight, activity level and goal (maintain, build muscle, lose fat). Backed by sports-nutrition ranges.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/protein-calculator/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Protein</span></header>
+<p><span class="badge">Goal-based</span><span class="badge">Evidence ranges</span><span class="badge">g per meal</span><span class="badge">Free</span></p>
+<h1>Protein Calculator</h1>
+<p class="sub">Your daily protein target based on weight, activity and goal.</p>
+<div class="card">
+<div style="display:flex;flex-direction:column;gap:12px;align-items:center">
+<label>Weight <input type="number" id="kg" value="70" min="30" step="any" style="width:90px"> kg</label>
+<label>Activity <select id="act"><option value="0.8">Sedentary</option><option value="1.2">Lightly active</option><option value="1.6" selected>Active / training</option><option value="2.0">Athlete / hard training</option></select></label>
+<label>Goal <select id="goal"><option value="0">Maintain</option><option value="0.3" selected>Build muscle</option><option value="0.2">Lose fat (preserve muscle)</option></select></label>
+</div>
+<div id="res" style="text-align:center;font-size:2.2rem;font-weight:800;color:var(--ok);margin-top:16px;min-height:1.3em"></div>
+<div id="meals" style="text-align:center;color:var(--mut)"></div>
+</div>
+<h2>The science ranges</h2><ul><li>Sedentary minimum: ~0.8 g/kg (RDA — a floor, not a target).</li><li>Muscle building: 1.6–2.2 g/kg is the evidence-backed sweet spot.</li><li>Fat loss phases: higher protein (1.8–2.7 g/kg) preserves lean mass.</li><li>Spread over 3–5 meals of 25–40 g each for best synthesis. Kidney-healthy people handle high protein fine; kidney conditions need medical advice.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calc(){
+  const kg=parseFloat(document.getElementById('kg').value)||0;
+  const base=parseFloat(document.getElementById('act').value);
+  const bump=parseFloat(document.getElementById('goal').value);
+  if(!(kg>0)){document.getElementById('res').textContent='';return;}
+  const g=Math.round(kg*(base+bump));
+  document.getElementById('res').textContent=g+' g / day';
+  document.getElementById('meals').textContent='≈ '+Math.round(g/4)+' g × 4 meals · range '+(g-15)+'–'+(g+20)+' g';
+}
+['kg','act','goal'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+</script>
+</body>
+</html>

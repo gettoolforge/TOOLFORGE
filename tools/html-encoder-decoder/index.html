@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML Encoder / Decoder — Escape & Unescape Entities | ToolForge</title>
+<meta name="description" content="Free HTML entity encoder and decoder: escape &lt; &gt; &amp; quotes for safe display, or decode entities back to text. Named and numeric entities supported.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/html-encoder-decoder/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">HTML Entities</span></header>
+<p><span class="badge">Both ways</span><span class="badge">Named entities</span><span class="badge">&#numeric; too</span><span class="badge">Free</span></p>
+<h1>HTML Encode / Decode</h1>
+<p class="sub">Escape text for HTML display — or decode entities back to plain text.</p>
+<div class="card">
+<textarea id="in" placeholder='Paste text OR encoded HTML like &lt;p&gt;Tom &amp; Jerry&lt;/p&gt;' style="min-height:130px"></textarea>
+<div style="display:flex;gap:8px;margin:12px 0">
+<button onclick="enc()">Encode →</button>
+<button onclick="dec()">← Decode</button>
+<button class="ghost" onclick="copyO()">Copy result</button>
+<span id="msg" class="ok"></span></div>
+<textarea id="out" readonly placeholder="Result appears here…" style="min-height:130px"></textarea>
+</div>
+<h2>When to encode</h2><ul><li>Showing code snippets on a page: <code>&lt;div&gt;</code> must become <code>&amp;lt;div&amp;gt;</code> or the browser renders it.</li><li>User content inside HTML: prevents broken markup and XSS.</li><li>The five essential entities: <code>&amp;amp; &amp;lt; &amp;gt; &amp;quot; &amp;#39;</code>. Decode handles 200+ named entities plus <code>&amp;#number;</code> and <code>&amp;xhex;</code>.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>const out=document.getElementById('out');
+const msg=document.getElementById('msg');
+const inEl=document.getElementById('in');
+
+const $=id=>document.getElementById(id);
+const NAMED={'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'",'&apos;':"'",'&nbsp;':' ','&copy;':'©','&reg;':'®','&trade;':'™','&mdash;':'—','&ndash;':'–','&hellip;':'…','&laquo;':'«','&raquo;':'»','&euro;':'€','&pound;':'£','&deg;':'°','&plusmn;':'±','&times;':'×','&divide;':'÷','&micro;':'µ','&para;':'¶','&sect;':'§','&bull;':'•','&dagger;':'†','&prime;':'′','&Prime;':'″','&larr;':'←','&rarr;':'→','&uarr;':'↑','&darr;':'↓','&harr;':'↔','&ne;':'≠','&le;':'≤','&ge;':'≥','&infin;':'∞','&sum;':'∑','&radic;':'√','&asymp;':'≈','&alpha;':'α','&beta;':'β','&pi;':'π','&Omega;':'Ω','&mu;':'μ'};
+function enc(){
+  const v=inEl.value;
+  if(!v)return;
+  out.value=v.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  msg.textContent='✓ Encoded';msg.className='ok';
+}
+function dec(){
+  let v=inEl.value;
+  if(!v)return;
+  // numeric first
+  v=v.replace(/&#x([0-9a-fA-F]+);/g,(m,h)=>String.fromCodePoint(parseInt(h,16)));
+  v=v.replace(/&#(\d+);/g,(m,d)=>String.fromCodePoint(+d));
+  // named (longest names first to avoid &not → &notin issues)
+  const names=Object.keys(NAMED).sort((a,b)=>b.length-a.length);
+  for(const n of names)v=v.split(n).join(NAMED[n]);
+  out.value=v;
+  msg.textContent='✓ Decoded';msg.className='ok';
+}
+async function copyO(){try{await navigator.clipboard.writeText(out.value);msg.textContent='✓ Copied';msg.className='ok';}catch(e){}}
+</script>
+</body>
+</html>

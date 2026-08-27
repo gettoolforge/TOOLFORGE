@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Height Converter — cm ↔ feet & inches | ToolForge</title>
+<meta name="description" content="Free height converter: centimeters to feet and inches (and back) with exact fractions. Common height reference table included. Instant, in-browser.">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/height-converter/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Height: cm ↔ ft/in</span></header>
+<p><span class="badge">Two-way</span><span class="badge">Exact inches</span><span class="badge">Reference table</span><span class="badge">Free</span></p>
+<h1>Height Converter</h1>
+<p class="sub">cm ↔ feet + inches, both directions, with exact inch math.</p>
+<div class="card">
+<div style="display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+<label>cm <input type="number" id="cm" value="175" min="0" step="any" style="width:90px"></label>
+<span style="color:var(--mut)">⇄</span>
+<label>ft <input type="number" id="ft" value="5" min="0" style="width:64px"></label>
+<label>in <input type="number" id="inch" value="9" min="0" max="11.99" step="any" style="width:72px"></label>
+</div>
+<div id="verbal" style="text-align:center;font-size:1.15rem;color:var(--ok);font-weight:700;min-height:1.5em"></div>
+<h3 style="font-size:.85rem;color:var(--mut);margin:20px 0 8px;text-align:center">COMMON HEIGHTS</h3>
+<table id="tbl" style="margin:0 auto;border-collapse:collapse;font-size:.9rem"></table>
+</div>
+<h2>Quick facts</h2><ul><li>1 inch = 2.54 cm exactly (since 1959 international agreement).</li><li>1 foot = 12 inches = 30.48 cm.</li><li>The display rounds to the nearest 0.5 inch for readability — the fields stay exact.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function calcFromCm(){
+  const cm=parseFloat(document.getElementById('cm').value);
+  if(isNaN(cm))return;
+  const totalIn=cm/2.54;
+  const ft=Math.floor(totalIn/12);
+  const inch=totalIn-ft*12;
+  document.getElementById('ft').value=ft;
+  document.getElementById('inch').value=(Math.round(inch*10)/10).toString();
+  verbal(cm,ft,inch);
+}
+function calcFromFt(){
+  const ft=parseFloat(document.getElementById('ft').value)||0;
+  const inch=parseFloat(document.getElementById('inch').value)||0;
+  const cm=(ft*12+inch)*2.54;
+  document.getElementById('cm').value=(Math.round(cm*10)/10).toString();
+  verbal(cm,ft,inch);
+}
+function verbal(cm,ft,inch){
+  const nearest=Math.round((cm/2.54)*2)/2;
+  const nft=Math.floor(nearest/12),nin=nearest-nft*12;
+  document.getElementById('verbal').textContent=cm+' cm ≈ '+ft+'′ '+(Math.round(inch*10)/10)+'″  (≈ '+nft+'′ '+nin+'″)';
+}
+function fillTbl(){
+  const heights=[150,155,160,165,170,175,180,185,190,195];
+  document.getElementById('tbl').innerHTML='<tr style="color:var(--mut)"><th style="padding:4px 14px">cm</th><th>ft ′ in″</th></tr>'+
+    heights.map(cm=>{const t=cm/2.54;const f=Math.floor(t/12);const i=(Math.round((t-f*12)*10)/10);return '<tr><td style="padding:3px 14px;text-align:center">'+cm+'</td><td style="text-align:center;font-family:ui-monospace">'+f+'′ '+i+'″</td></tr>';}).join('');
+}
+document.getElementById('cm').addEventListener('input',calcFromCm);
+document.getElementById('ft').addEventListener('input',calcFromFt);
+document.getElementById('inch').addEventListener('input',calcFromFt);
+fillTbl();calcFromCm();
+</script>
+</body>
+</html>
