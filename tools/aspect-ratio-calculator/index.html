@@ -4,122 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aspect Ratio Calculator — Resize Without Distortion | ToolForge</title>
-<meta name="description" content="Free aspect ratio calculator: enter width OR height and get the matching dimension for any ratio (16:9, 4:3, 1:1…). Perfect for video and image resizing.">
+<meta name="description" content="Free aspect ratio calculator: enter original dimensions plus one new side, get the other instantly. Presets for 16:9, 4:3, 1:1, 21:9, common video and photo formats.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/aspect-ratio-calculator/">
 <link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Aspect Ratio Calculator","applicationCategory":\"MultimediaApplication\",\"operatingSystem\":\"Any (browser)\",\"offers\":{\"@type\":\"Offer\",\"price\":\"0\",\"priceCurrency\":\"USD\"}}
-</script>
+
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
-  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
-  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
-  header .crumb{color:var(--mut);font-size:.95rem}
-  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
-  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
-  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
-  input[type=number],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
-  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:10px}
-  button.ghost{background:#232a38;color:var(--text)}
-  input[type=number]{width:120px}
-  label{margin-right:8px;color:var(--mut);font-size:.92rem}
-  #viz{max-width:420px;height:200px;margin:18px auto 0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#0c0e13;border:1px solid #262c38}
-  #rect{background:linear-gradient(135deg,#4f8cff33,#b45cf733);border:1px solid var(--acc);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--acc)}
-  #res{margin-top:16px;line-height:2;text-align:center;min-height:2em}
-  b.ok{color:var(--ok)}
-  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
 </style>
 </head>
 <body>
 <main>
-<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Aspect Ratio Calculator</span></header>
-  <p><span class="badge">Live preview</span><span class="badge">Common presets</span><span class="badge">No signup</span><span class="badge">Free</span></p>
-  <h1>Aspect Ratio Calculator</h1>
-  <p class="sub">Resize images & video without distortion — set the ratio, change one side, get the other.</p>
-
-  <div class="card">
-    <label>Ratio:</label>
-    <input type="text" id="ratio" value="16:9" placeholder="e.g. 16:9"> 
-    <button onclick="applyRatio()" class="ghost" style="margin-top:0">Apply</button>
-    <div style="margin-top:10px">
-      <button class="ghost preset" data-r="16:9">16:9 HD</button><button class="ghost preset" data-r="4:3">4:3 Classic</button><button class="ghost preset" data-r="1:1">1:1 Square</button><button class="ghost preset" data-r="9:16">9:16 Vertical/Shorts</button><button class="ghost preset" data-r="21:9">21:9 Ultrawide</button><button class="ghost preset" data-r="3:2">3:2 Photo</button><button class="ghost preset" data-r="2.39:1">2.39:1 Cinema</button>
-    </div>
-    <br><br>
-    <label>Width</label> <input type="number" id="w" value="1920" min="1">
-    <label style="margin-left:14px">Height</label> <input type="number" id="h" value="1080" min="1">
-    <div id="viz"><div id="rect"></div></div>
-    <div id="res"></div>
-  </div>
-
-  <h2>Common aspect ratios</h2>
-  <ul>
-    <li><strong>16:9</strong> — YouTube, TV, monitors (1920×1080, 1280×720)</li>
-    <li><strong>9:16</strong> — Shorts, Reels, TikTok, phone screens (1080×1920)</li>
-    <li><strong>1:1</strong> — Instagram feed posts (1080×1080)</li>
-    <li><strong>4:5</strong> — Instagram portrait (feeds taller than wide)</li>
-    <li><strong>21:9 / 2.39:1</strong> — ultrawide monitors & cinematic films</li>
-    <li>Tip: to keep sharpness when downscaling video, keep both sides even (divisible by 2) for most codecs.</li>
-  </ul>
-
-  <p class="muted">Part of ToolForge — free browser tools.</p>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Aspect Ratio</span></header>
+<p><span class="badge">Two-way</span><span class="badge">Presets</span><span class="badge">Simplify ratio</span><span class="badge">Free</span></p>
+<h1>Aspect Ratio Calculator</h1>
+<p class="sub">Scale width or height without distortion — plus common ratio presets.</p>
+<div class="card">
+<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:14px">
+<label>Width <input type="number" id="w" value="1920" min="1" style="width:96px"></label>
+×
+<label>Height <input type="number" id="h" value="1080" min="1" style="width:96px"></label>
+</div>
+<div id="ratio" style="text-align:center;font-size:1.15rem;font-weight:700;color:var(--acc)"></div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap">
+<label>NEW width <input type="number" id="nw" placeholder="—" min="0" style="width:96px"></label>
+<span style="color:var(--mut)">or</span>
+<label>NEW height <input type="number" id="nh" placeholder="—" min="0" style="width:96px"></label>
+</div>
+<div id="res" style="text-align:center;font-size:1.4rem;font-weight:700;color:var(--ok);margin-top:14px;min-height:1.5em"></div>
+<div style="text-align:center;margin-top:12px">
+<span style="color:var(--mut);font-size:.85rem">Presets: </span>
+<button class="ghost" data-p="16:9" style="padding:5px 10px;font-size:.8rem">16:9</button>
+<button class="ghost" data-p="4:3" style="padding:5px 10px;font-size:.8rem">4:3</button>
+<button class="ghost" data-p="1:1" style="padding:5px 10px;font-size:.8rem">1:1</button>
+<button class="ghost" data-p="21:9" style="padding:5px 10px;font-size:.8rem">21:9</button>
+<button class="ghost" data-p="9:16" style="padding:5px 10px;font-size:.8rem">9:16 vertical</button>
+</div>
+</div>
+<h2>Uses</h2><ul><li>Resize images/video without stretching — enter one new side, get the exact other.</li><li>Check camera crops (21:9 cinematic, 9:16 Shorts/TikTok/Reels, 4:5 Instagram portrait).</li><li>The ratio is simplified via GCD (1920×1080 → 16:9), so you see the true shape.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-let rw=16,rh=9;
-function parseRatio(s){
-  const m=s.trim().replace(/×|x/gi,':').match(/^(\d+(?:\.\d+)?)\s*[:/]?\s*(\d+(?:\.\d+)?)?$/);
-  if(m)return [parseFloat(m[1]),m[2]!==undefined?parseFloat(m[2]):1];
-  return null;
-}
-function applyRatio(){
-  const r=parseRatio($('ratio').value);
-  if(!r||r[0]<=0||r[1]<=0){$('res').innerHTML='<span style="color:#f87171">⚠ Ratio format: width:height like 16:9</span>';return;}
-  rw=r[0];rh=r[1];
-  // simplify
-  const g=gcd(Math.round(rw),Math.round(rh));
-  $('res').innerHTML='Ratio set to <b class="ok">'+(Math.round(rw)/g).toFixed(0)+':'+(Math.round(rh)/g).toFixed(0)+'</b>'+(rw%1?' ('+rw+':'+rh+')':'');
-  calc();
-}
 function gcd(a,b){return b?gcd(b,a%b):a;}
-function calc(){
-  const w=parseFloat($('w').value),h=parseFloat($('h').value);
-  let out='';
-  if(w>0&&(isNaN(h)||!h)){
-    const nh=Math.round(w*rw/rh);
-    out='At width <b class="ok">'+w+'</b> → height = <b class="ok">'+nh+'</b>';
-    draw(w,nh);
-  }else if(h>0&&(isNaN(w)||!w)){
-    const nw=Math.round(h*rw/rh);
-    out='At height <b class="ok">'+h+'</b> → width = <b class="ok">'+nw+'</b>';
-    draw(nw,h);
-  }else if(w>0&&h>0){
-    const actual=w/h,target=rw/rh;
-    if(Math.abs(actual-target)<0.01){out='<b class="ok">✓ '+w+'×'+h+' matches '+rw+':'+rh+'</b>';draw(w,h);}
-    else{
-      const correctH=Math.round(w*rh/rw);
-      out=w+'×'+h+' is '+actual.toFixed(3)+' ('+(actual>target?'wider':'taller')+' than '+rw+':'+rh+')<br>'+
-        'Matching height for width '+w+': <b class="ok">'+correctH+'</b>';
-      draw(w,correctH);
-    }
-  }
-  $('res').innerHTML=out;
+function upd(){
+  const W=+w.value,H=+h.value;
+  if(!(W>0)||!(H>0)){ratio.textContent='';return;}
+  const g=gcd(W,H);
+  ratio.textContent=(W/g)+':'+(H/g);
+  const NW=+nw.value,NH=+nh.value;
+  if(NW>0&&!(NH>0)){res.textContent='height = '+Math.round(NW*H/W);return;}
+  if(NH>0&&!(NW>0)){res.textContent='width = '+Math.round(NH*W/H);return;}
+  if(NW>0&&NH>0){res.textContent='both set — clear one';return;}
+  res.textContent='';
 }
-function draw(w,h){
-  const box=$('viz');
-  const maxW=box.clientWidth-24,maxH=box.clientHeight-24;
-  const scale=Math.min(maxW/w,maxH/h);
-  const rect=$('rect');
-  rect.style.width=(w*scale)+'px';
-  rect.style.height=(h*scale)+'px';
-  rect.textContent=w+' × '+h;
-}
-['w','h'].forEach(id=>$(id).addEventListener('input',calc));
-$('ratio').addEventListener('keydown',e=>{if(e.key==='Enter')applyRatio();});
-document.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>{$('ratio').value=b.dataset.r;applyRatio();}));
-window.addEventListener('resize',()=>calc());
-calc();
+['w','h','nw','nh'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{
+  if(id==='w'||id==='h'){nw.value='';nh.value='';}
+  if(id==='nw')nh.value='';
+  if(id==='nh')nw.value='';
+  upd();
+}));
+document.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{
+  const [a,c]=b.dataset.p.split(':').map(Number);
+  w.value=a*120;h.value=c*120;upd();
+}));
+upd();
 </script>
 </body>
 </html>

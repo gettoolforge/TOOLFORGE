@@ -56,4 +56,6 @@
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/water-intake/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/vat-calculator/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/find-and-replace/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/cron-parser/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://gettoolforge.github.io/TOOLFORGE/tools/jwt-decoder/</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
 </urlset>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JWT Decoder — Inspect Header & Payload Claims | ToolForge</title>
+<meta name="description" content="Decode JSON Web Tokens (JWT) online: inspect header, payload claims and expiry — without sending the token anywhere. Signature NOT verified (client-side only).">
+<link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/jwt-decoder/">
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
+<style>
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">JWT Decoder</span></header>
+<p><span class="badge">Never sent</span><span class="badge">Expiry check</span><span class="badge">Base64url</span><span class="badge">Free</span></p>
+<h1>JWT Decoder</h1>
+<p class="sub">Paste a JWT — see header, payload and expiry decoded. Nothing is sent anywhere.</p>
+<div class="card">
+<textarea id="tok" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NSIsIm5hbWUiOiJKb2huIn0.sig" style="min-height:110px"></textarea>
+<div id="out" style="margin-top:14px"></div>
+</div>
+<h2>Safety notes</h2><ul><li><strong>Decoding ≠ verifying.</strong> The signature is only checked by whoever holds the secret key. This tool decodes; it does not prove authenticity.</li><li>Never paste production tokens into tools you don't trust — this one runs fully offline in your tab, but the habit matters.</li><li><code>exp</code> (expiry) and <code>iat</code> (issued-at) are Unix seconds — shown here as dates.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function b64url(s){
+  s=s.replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  return decodeURIComponent(Array.from(atob(s)).map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+function fmtClaims(o){
+  let html='<table style="width:100%;border-collapse:collapse;font-size:.9rem">';
+  for(const [k,v] of Object.entries(o)){
+    let disp=(typeof v==='object')?JSON.stringify(v):String(v);
+    if(k==='exp'||k==='iat'||k==='nbf'){
+      const d=new Date(v*1000);
+      disp+=' <span style="color:var(--mut)">'+(isNaN(d)?'(invalid)':d.toLocaleString())+'</span>';
+      if(k==='exp')disp+=d>new Date?' <span style="color:var(--ok)">✓ valid</span>':' <span style="color:#f87171">✗ EXPIRED</span>';
+    }
+    html+='<tr><td style="padding:5px 10px 5px 0;color:var(--mut);white-space:nowrap"><code>'+k+'</code></td><td style="word-break:break-all">'+disp+'</td></tr>';
+  }
+  return html+'</table>';
+}
+function run(){
+  const t=tok.value.trim();
+  if(!t){out.innerHTML='';return;}
+  const parts=t.split('.');
+  if(parts.length<2){out.innerHTML='<span style="color:#f87171">✗ Not a JWT — need at least header.payload</span>';return;}
+  try{
+    const head=JSON.parse(b64url(parts[0]));
+    const pay=JSON.parse(b64url(parts[1]));
+    out.innerHTML='<b style="color:var(--mut);font-size:.82rem">HEADER</b>'+fmtClaims(head)+
+      '<div style="height:8px"></div><b style="color:var(--mut);font-size:.82rem">PAYLOAD</b>'+fmtClaims(pay)+
+      '<div style="height:8px"></div><b style="color:var(--mut);font-size:.82rem">SIGNATURE</b><span style="color:var(--mut);font:12px ui-monospace">'+(parts[2]||'(none — unsigned token)')+'</span>'+
+      '<div style="color:var(--mut);font-size:.8rem;margin-top:6px">Decoded only — signature NOT verified.</div>';
+  }catch(e){out.innerHTML='<span style="color:#f87171">✗ Decode failed: '+e.message+'</span>';}
+}
+tok.addEventListener('input',run);run();
+</script>
+</body>
+</html>

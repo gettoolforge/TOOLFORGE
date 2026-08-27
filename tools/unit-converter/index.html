@@ -3,125 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unit Converter — Length, Weight, Temperature, Data & More | ToolForge</title>
-<meta name="description" content="Convert between units instantly: length, weight, temperature, area, volume, speed and data size. Free, private, no signup — runs in your browser.">
+<title>Unit Converter — Length, Weight, Volume, Temp, Data & More | ToolForge</title>
+<meta name="description" content="Free unit converter: length, weight, temperature, volume, area, speed and data units. Precise factors, instant conversion, both directions. In-browser, no ads on math.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/unit-converter/">
 <link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Unit Converter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
-</script>
+
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
-  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
-  header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-  header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
-  header .crumb{color:var(--mut);font-size:.95rem}
-  h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
-  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
-  .card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
-  select,input[type=text],button{font-size:1rem;border-radius:10px;padding:10px 14px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
-  button{background:var(--acc);color:#fff;border:0;cursor:pointer;margin-top:10px}
-  button.ghost{background:#232a38;color:var(--text)}
-  input[type=text]{width:min(260px,100%);font-weight:600}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
-  #result{margin-top:16px;font-size:1.25rem;font-weight:700;color:var(--ok);min-height:1.5em}
-  h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}
-  .catbtns{display:flex;gap:8px;flex-wrap:wrap}
-  .catbtns button{background:#232a38;color:var(--text);margin:0;padding:8px 14px}
-  .catbtns button.active{background:var(--acc);color:#fff}
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
 </style>
 </head>
 <body>
 <main>
 <header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Unit Converter</span></header>
-  <p><span class="badge">7 categories</span><span class="badge">Instant</span><span class="badge">100% private</span><span class="badge">Free</span></p>
-  <h1>Unit Converter</h1>
-  <p class="sub">Length · weight · temperature · area · volume · speed · data — precise conversions as you type.</p>
-
-  <div class="card">
-    <div class="catbtns" id="cats"></div>
-    <div class="row">
-      <input type="text" id="val" value="1" inputmode="decimal">
-      <select id="from"></select>
-      <span style="color:var(--mut)">→</span>
-      <select id="to"></select>
-    </div>
-    <button onclick="swap()" class="ghost">⇄ Swap</button>
-    <div id="result"></div>
-  </div>
-
-  <h2>Handy reference points</h2>
-  <ul>
-    <li>1 inch = 2.54 cm exactly · 1 mile = 1.609 km · 1 kg = 2.205 lb</li>
-    <li>°F → °C: subtract 32, multiply by 5/9 (e.g. 100°F ≈ 37.8°C)</li>
-    <li>Data: manufacturers count 1 GB = 1000 MB; Windows shows 1 GiB = 1024 MiB — that's why drives "shrink"</li>
-  </ul>
-
-  <p class="muted">Part of ToolForge — free browser tools.</p>
+<p><span class="badge">7 categories</span><span class="badge">Two-way</span><span class="badge">Precise</span><span class="badge">Free</span></p>
+<h1>Unit Converter</h1>
+<p class="sub">Seven categories, precise factors, instant two-way conversion.</p>
+<div class="card">
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:16px">
+<label>Category <select id="cat"></select></label>
+<label>From <select id="from"></select></label>
+⇄
+<label>To <select id="to"></select></label>
+</div>
+<div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap">
+<input type="number" id="v" value="1" step="any" style="width:130px;font-size:1.05rem">
+<span style="color:var(--mut)">=</span>
+<div id="res" style="font-size:1.5rem;font-weight:700;color:var(--ok);min-width:120px"></div>
+</div>
+<div style="text-align:center;margin-top:14px"><button class="ghost" onclick="swap()">⇄ Swap units</button></div>
+</div>
+<h2>Categories</h2><ul><li><strong>Length</strong> mm→light-years · <strong>Weight</strong> mg→tons · <strong>Temperature</strong> °C/°F/K (non-linear, handled properly)</li><li><strong>Volume</strong> ml→gallons (US) · <strong>Area</strong> mm²→hectares · <strong>Speed</strong> km/h→knots · <strong>Data</strong> bit→TB (binary KiB/MiB included)</li><li>Temperature converts via offset formulas, not ratios — 0°C ≠ 0°F.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
 </main>
 <script>
+const $=id=>document.getElementById(id);
 const CATS={
- 'Length':{m:'meter',km:'kilometer',cm:'centimeter',mm:'millimeter',mi:'mile',yd:'yard',ft:'foot',in:'inch'},
- 'Weight':{kg:'kilogram',g:'gram',mg:'milligram',t:'tonne',lb:'pound',oz:'ounce',st:'stone'},
- 'Temperature':{'°C':'Celsius','°F':'Fahrenheit','K':'Kelvin'},
- 'Area':{'m²':'sq meter','km²':'sq kilometer','cm²':'sq centimeter','ha':'hectare','ac':'acre','ft²':'sq foot','mi²':'sq mile'},
- 'Volume':{l:'liter',ml:'milliliter','m³':'cubic meter',galUS:'US gallon',qt:'US quart',cupUS:'US cup',flozUS:'US fl oz',galUK:'UK gallon'},
- 'Speed':{'m/s':'meter/second',kmh:'km/h',mph:'mph',kn:'knot',fts:'ft/s'},
- 'Data':{B:'byte',KB:'kilobyte',MB:'megabyte',GB:'gigabyte',TB:'terabyte',KiB:'kibibyte',MiB:'mebibyte',GiB:'gibibyte'}
+ 'Length':{base:'m',units:{'mm':0.001,'cm':0.01,'m':1,'km':1000,'in':0.0254,'ft':0.3048,'yd':0.9144,'mi':1609.344,'nmi':1852,'light-year':9.4607e15}},
+ 'Weight':{base:'kg',units:{'mg':1e-6,'g':0.001,'kg':1,'tonne':1000,'oz':0.0283495,'lb':0.453592,'stone':6.35029,'ton (US)':907.185}},
+ 'Temperature':{special:true,units:{'°C':1,'°F':1,'K':1}},
+ 'Volume':{base:'l',units:{'ml':0.001,'l':1,'m³':1000,'tsp (US)':0.00492892,'tbsp (US)':0.0147868,'cup (US)':0.236588,'pt (US)':0.473176,'qt (US)':0.946353,'gal (US)':3.78541}},
+ 'Area':{base:'m²',units:{'mm²':1e-6,'cm²':1e-4,'m²':1,'km²':1e6,'ha':10000,'acre':4046.86,'ft²':0.092903,'mi²':2.58999e6}},
+ 'Speed':{base:'m/s',units:{'m/s':1,'km/h':0.277778,'mph':0.44704,'knot':0.514444,'ft/s':0.3048}},
+ 'Data':{base:'byte',units:{'bit':0.125,'byte':1,'KB':1000,'KiB':1024,'MB':1e6,'MiB':1048576,'GB':1e9,'GiB':1073741824,'TB':1e12,'TiB':1.0995e12}}
 };
-const TO_BASE={
- Length:{m:1,km:1000,cm:.01,mm:.001,mi:1609.344,yd:.9144,ft:.3048,in:.0254},
- Weight:{kg:1,g:.001,mg:1e-6,t:1000,lb:.45359237,oz:.028349523125,st:6.35029318},
- Area:{'m²':1,'km²':1e6,'cm²':1e-4,ha:1e4,ac:4046.8564224,'ft²':0.09290304,'mi²':2589988.110336},
- Volume:{l:1,ml:.001,'m³':1000,galUS:3.785411784,qt:.946352946,cupUS:.2365882365,flozUS:.0295735295625,galUK:4.54609},
- Speed:{'m/s':1,kmh:1/3.6,mph:0.44704,kn:0.514444444,fts:0.3048},
- Data:{B:1,KB:1e3,MB:1e6,GB:1e9,TB:1e12,KiB:1024,MiB:1048576,GiB:1073741824}
-};
-let cat='Length';
-function tempConvert(v,from,to){
-  let c;
-  if(from==='°C')c=v;
-  else if(from==='°F')c=(v-32)*5/9;
-  else c=v-273.15;
-  if(to==='°C')return c;
-  if(to==='°F')return c*9/5+32;
-  return c+273.15;
+function toC(v,u){return u==='°C'?v:u==='°F'?(v-32)*5/9:v-273.15;}
+function fromC(c,u){return u==='°C'?c:u==='°F'?c*9/5+32:c+273.15;}
+function fill(){
+  const c=CATS[document.getElementById('cat').value];
+  const opts=Object.keys(c.units).map(u=>'<option>'+u+'</option>').join('');
+  from.innerHTML=opts;to.innerHTML=opts;
+  const ks=Object.keys(c.units);
+  to.selectedIndex=Math.min(1,ks.length-1);
 }
-function convert(v,from,to){
-  if(cat==='Temperature')return tempConvert(v,from,to);
-  return v*(TO_BASE[cat][from]/TO_BASE[cat][to]);
+function calc(){
+  const cat=document.getElementById('cat').value,c=CATS[cat];
+  const f=from.value,t=to.value,v=parseFloat(document.getElementById('v').value);
+  if(isNaN(v)){res.textContent='';return;}
+  let out;
+  if(c.special){out=fromC(toC(v,f),t);}
+  else{out=v*c.units[f]/c.units[t];}
+  const nice=Math.abs(out)>=1e6||Math.abs(out)<0.001&&out!==0?out.toExponential(4):parseFloat(out.toPrecision(7)).toString();
+  res.textContent=nice+' '+t;
 }
-function fmt(n){
-  if(!isFinite(n))return '—';
-  if(n!==0&&(Math.abs(n)<1e-6||Math.abs(n)>=1e15))return n.toExponential(6);
-  const s=parseFloat(n.toPrecision(10)).toString();
-  return s.length>18?Number(n).toPrecision(10):s;
-}
-function renderCats(){
-  document.getElementById('cats').innerHTML=Object.keys(CATS).map(c=>'<button class="'+(c===cat?'active':'')+'" onclick="setCat(\''+c+'\')">'+c+'</button>').join('');
-}
-function setCat(c){cat=c;renderCats();fillSelects();}
-function fillSelects(){
-  const units=Object.keys(CATS[cat]);
-  document.getElementById('from').innerHTML=units.map(u=>'<option>'+u+'</option>').join('');
-  document.getElementById('to').innerHTML=units.map(u=>'<option>'+u+'</option>').join('');
-  document.getElementById('to').selectedIndex=Math.min(1,units.length-1);
-  update();
-}
-function swap(){const f=document.getElementById('from'),t=document.getElementById('to');[f.value,t.value]=[t.value,f.value];update();}
-function update(){
-  const raw=document.getElementById('val').value.replace(',','.');
-  const v=parseFloat(raw);
-  const from=document.getElementById('from').value,to=document.getElementById('to').value;
-  const r=document.getElementById('result');
-  if(isNaN(v)){r.textContent='';return;}
-  r.textContent=fmt(v)+' '+from+' = '+fmt(convert(v,from,to))+' '+to;
-}
-document.getElementById('val').addEventListener('input',update);
-document.getElementById('from').addEventListener('change',update);
-document.getElementById('to').addEventListener('change',update);
-renderCats();fillSelects();
+function swap(){const a=from.selectedIndex;from.value=to.value;to.selectedIndex=a;calc();}
+document.getElementById('cat').innerHTML=Object.keys(CATS).map(k=>'<option>'+k+'</option>').join('');
+document.getElementById('cat').addEventListener('change',()=>{fill();calc();});
+from.addEventListener('change',calc);to.addEventListener('change',calc);
+document.getElementById('v').addEventListener('input',calc);
+fill();calc();
 </script>
 </body>
 </html>

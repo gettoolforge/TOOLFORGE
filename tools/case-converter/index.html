@@ -3,94 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Case Converter — UPPER, lower, Title, camelCase, snake_case | ToolForge</title>
-<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
-<meta name="description" content="Convert text between UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase and snake_case instantly. Free, private, no signup — runs in your browser.">
+<title>Text Case Converter — UPPER, lower, Title, camel, snake, kebab | ToolForge</title>
+<meta name="description" content="Convert text case instantly: UPPERCASE, lowercase, Title Case, Sentence case, camelCase, PascalCase, snake_case, kebab-case and CONSTANT_CASE. One click, in-browser.">
 <link rel="canonical" href="https://gettoolforge.github.io/TOOLFORGE/tools/case-converter/">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Case Converter","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
-</script>
+<link rel="icon" type="image/svg+xml" href="/TOOLFORGE/favicon.svg">
+
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
-  *{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
-  main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
-  h1{background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.7rem;margin:.2em 0 .3em}.sub{color:var(--mut);margin-top:0}
-  .badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
-  .card{transition:border-color .15s ease, transform .15s ease;background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
-  textarea{width:100%;min-height:140px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:12px;font:15px/1.5 system-ui,sans-serif;resize:vertical}
-  button{background:#232a38;color:var(--text);border:0;border-radius:10px;padding:10px 14px;font-size:.95rem;cursor:pointer;margin:10px 6px 0 0}
-  button:hover{background:#2b3446}
-  #msg{margin-left:10px;color:var(--ok)}
-  pre{background:#0c0e13;border:1px solid #2b3342;border-radius:10px;padding:12px;overflow:auto;display:none}
-  h2{margin-top:26px}ul,ol{padding-left:22px}.muted{color:var(--mut)}
+:root{--bg:#0f1115;--card:#171a21;--text:#e6e9ef;--mut:#98a2b3;--acc:#4f8cff;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+main{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+header a{text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem}
+header .crumb{color:var(--mut);font-size:.95rem}
+h1{font-size:1.7rem;margin:.2em 0 .3em;background:linear-gradient(90deg,#4f8cff,#b45cf7);-webkit-background-clip:text;background-clip:text;color:transparent}.sub{color:var(--mut);margin-top:0}
+.badge{display:inline-block;background:#1d2534;color:var(--acc);border-radius:999px;padding:2px 12px;font-size:.8rem;margin-right:6px}
+.card{background:var(--card);border:1px solid #262c38;border-radius:14px;padding:18px;margin:18px 0}
+button{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:1rem;cursor:pointer;margin-right:8px}
+button.ghost{background:#232a38;color:var(--text)}
+textarea{width:100%;min-height:150px;background:#0c0e13;color:var(--text);border:1px solid #2b3342;border-radius:10px;padding:11px;font:13px/1.55 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+input[type=text],input[type=number],select{font-size:.95rem;border-radius:9px;padding:9px 12px;border:1px solid #2b3342;background:#0c0e13;color:var(--text)}
+label{color:var(--mut);font-size:.88rem}
+#msg{margin-left:8px;color:var(--err)}#msg.ok{color:var(--ok)}
+h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:#0c0e13;padding:1px 6px;border-radius:6px}
 </style>
 </head>
 <body>
 <main>
-<header style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><a href="../../" style="text-decoration:none;color:var(--acc);font-weight:700;font-size:1.05rem">⚙️ ToolForge</a><span style="color:var(--mut)">/</span><span style="color:var(--mut);font-size:.95rem">Text Case Converter</span></header>
-
-  <p><span class="badge">7 formats</span><span class="badge">100% private</span><span class="badge">No signup</span><span class="badge">Free</span></p>
-  <h1>Text Case Converter</h1>
-  <p class="sub">Paste text, click the format you need, copy the result. Handles titles, code variables, headlines and shouty caps alike.</p>
-
-  <div class="card">
-    <label for="in"><strong>Your text:</strong></label><br>
-    <textarea id="in" placeholder="the quick brown fox jumps over the lazy dog"></textarea>
-    <button onclick="conv('upper')">UPPERCASE</button>
-    <button onclick="conv('lower')">lowercase</button>
-    <button onclick="conv('title')">Title Case</button>
-    <button onclick="conv('sentence')">Sentence case</button>
-    <button onclick="conv('camel')">camelCase</button>
-    <button onclick="conv('pascal')">PascalCase</button>
-    <button onclick="conv('snake')">snake_case</button>
-    <button onclick="document.getElementById('in').value='';document.getElementById('msg').textContent=''">Clear</button>
-    <span id="msg"></span>
-    <pre id="out"></pre>
-  </div>
-
-  <h2>When to use which format?</h2>
-  <ul>
-    <li><strong>Title Case</strong> — headlines, YouTube titles, blog posts (minor words like "of/the/and" stay small).</li>
-    <li><strong>Sentence case</strong> — normal paragraphs, emails, descriptions.</li>
-    <li><strong>camelCase / PascalCase / snake_case</strong> — variable names in JavaScript/Python and file names.</li>
-    <li><strong>UPPERCASE</strong> — constants in code, emphasis; avoid for long texts (harder to read).</li>
-  </ul>
-
-  <h2>How it works</h2>
-  <ol>
-    <li>Paste your text above.</li>
-    <li>Click a format — result replaces the box so you can chain conversions.</li>
-    <li>Copy from the box when happy. Nothing was uploaded anywhere.</li>
-  </ol>
-
-  <p class="muted">Part of ToolForge — free browser tools. More converters coming.</p>
+<header><a href="../../">⚙️ ToolForge</a><span>/</span><span class="crumb">Case Converter</span></header>
+<p><span class="badge">8 styles</span><span class="badge">Smart word split</span><span class="badge">Instant</span><span class="badge">Free</span></p>
+<h1>Case Converter</h1>
+<p class="sub">Eight case styles, one click each — including programmer cases.</p>
+<div class="card">
+<textarea id="txt" placeholder="Paste or type your text here…" style="min-height:130px"></textarea>
+<div id="btns" style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"></div>
+<textarea id="out" readonly placeholder="Converted text appears here…" style="min-height:130px"></textarea>
+<div style="margin-top:8px"><button class="ghost" onclick="copyOut()">Copy result</button><span id="msg" class="ok"></span></div>
+</div>
+<h2>Cheat sheet</h2><ul><li><strong>Title Case</strong>: Every Word Capitalized (small words like "of" stay lowercase)</li><li><strong>camelCase</strong>: firstWordLowercaseRest · <strong>PascalCase</strong>: EveryWordCapitalized</li><li><strong>snake_case</strong>: for Python · <strong>kebab-case</strong>: for URLs/CSS · <strong>CONSTANT_CASE</strong>: for constants</li><li>Splitting handles camelCase input: "getUserData" → "get user data" → any target case.</li></ul>
+<p class="muted">Part of ToolForge — free browser tools.</p>
 </main>
 <script>
-const SMALL=new Set(['a','an','and','as','at','but','by','for','if','in','nor','of','on','or','per','so','the','to','v','via','vs']);
-function conv(mode){
-  const el=document.getElementById('in');
-  const src=el.value;
-  const msg=document.getElementById('msg');
-  if(!src.trim()){msg.textContent='⚠ Nothing to convert';return;}
-  let out=src;
-  if(mode==='upper')out=src.toUpperCase();
-  else if(mode==='lower')out=src.toLowerCase();
-  else if(mode==='title')out=src.toLowerCase().split(/(\s+)/).map((w,i,arr)=>{
-    if(!w.trim())return w;
-    if(i!==0&&i!==arr.length-1&&SMALL.has(w))return w;
-    return w[0].toUpperCase()+w.slice(1);
-  }).join('');
-  else if(mode==='sentence')out=src.toLowerCase().replace(/(^\s*[a-z])|([.!?]\s+[a-z])/g,m=>m.toUpperCase());
-  else{
-    const words=src.replace(/([a-z])([A-Z])/g,'$1 $2').split(/[^A-Za-z0-9]+/).filter(Boolean).map(w=>w.toLowerCase());
-    if(!words.length){msg.textContent='⚠ No letters found';return;}
-    if(mode==='camel')out=words[0]+words.slice(1).map(w=>w[0].toUpperCase()+w.slice(1)).join('');
-    else if(mode==='pascal')out=words.map(w=>w[0].toUpperCase()+w.slice(1)).join('');
-    else if(mode==='snake')out=words.join('_');
-  }
-  el.value=out;
-  msg.textContent='✓ Converted ('+mode+')';
+const $=id=>document.getElementById(id);
+const small=new Set(['a','an','and','as','at','but','by','for','if','in','nor','of','on','or','so','the','to','up','yet']);
+function words(){
+  return txt.value
+    .replace(/([a-z0-9])([A-Z])/g,'$1 $2')
+    .replace(/[_-]+/g,' ')
+    .replace(/[^A-Za-z0-9\s]/g,' ')
+    .trim().split(/\s+/).filter(Boolean);
 }
+const CASES={
+ 'UPPERCASE':w=>w.join(' ').toUpperCase(),
+ 'lowercase':w=>w.join(' ').toLowerCase(),
+ 'Title Case':w=>w.map((x,i)=>small.has(x.toLowerCase())&&i>0?x.toLowerCase():x.charAt(0).toUpperCase()+x.slice(1).toLowerCase()).join(' '),
+ 'Sentence case':w=>{const s=w.join(' ').toLowerCase();return s.charAt(0).toUpperCase()+s.slice(1);},
+ 'camelCase':w=>w.map((x,i)=>i===0?x.toLowerCase():x.charAt(0).toUpperCase()+x.slice(1).toLowerCase()).join(''),
+ 'PascalCase':w=>w.map(x=>x.charAt(0).toUpperCase()+x.slice(1).toLowerCase()).join(''),
+ 'snake_case':w=>w.map(x=>x.toLowerCase()).join('_'),
+ 'kebab-case':w=>w.map(x=>x.toLowerCase()).join('-'),
+ 'CONSTANT_CASE':w=>w.map(x=>x.toUpperCase()).join('_')
+};
+const btns=document.getElementById('btns');
+for(const [name,fn] of Object.entries(CASES)){
+  const b=document.createElement('button');
+  b.className='ghost';b.textContent=name;b.style.fontSize='.85rem';
+  b.addEventListener('click',()=>{out.value=fn(words());});
+  btns.appendChild(b);
+}
+async function copyOut(){try{await navigator.clipboard.writeText(out.value);msg.textContent='✓ Copied';setTimeout(()=>msg.textContent='',1400);}catch(e){}}
 </script>
 </body>
 </html>
