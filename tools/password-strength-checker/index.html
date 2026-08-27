@@ -125,7 +125,7 @@ function analyze(pw){
     if(!/[A-Z]/.test(pw))findings.push('→ Add uppercase letters.');
     if(!/[^A-Za-z0-9]/.test(pw))findings.push('→ Add symbols (!@#…).');
   }
-  return {bits,col,w,word,human(seconds),findings};
+  return {bits,col,w,word,crack:human(seconds),findings};
 }
 const $=id=>document.getElementById(id);
 function update(){

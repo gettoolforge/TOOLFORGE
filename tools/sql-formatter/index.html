@@ -52,7 +52,7 @@ function fmtSql(sql,upper,breaks){
   if(breaks){
     // newline BEFORE breaking keywords
     const rx=new RegExp('\\b('+BREAK.join('|')+')\\b','g');
-    s=s.replace(rx,'\n'+m=>m.toUpperCase());
+    s=s.replace(rx,m=>'\n'+m.toUpperCase());
     s=s.replace(rx,m=>'\n'+m);
     s=s.replace(/\n+/g,'\n').split('\n').map(line=>{
       const t=line.trim();
@@ -65,9 +65,9 @@ function fmtSql(sql,upper,breaks){
   return s;
 }
 function fmt(){
-  const src=in.value.trim();
+  const src=inEl.value.trim();
   if(!src){msg.textContent='⚠ Paste SQL first';msg.className='';return;}
-  in.value=fmtSql(src,upper.checked,breaks.checked);
+  inEl.value=fmtSql(src,upper.checked,breaks.checked);
   msg.textContent='✓ Formatted';
 }
 </script>

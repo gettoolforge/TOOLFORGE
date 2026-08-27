@@ -239,7 +239,7 @@ function fft(re,im){
 }
 function chromagram(L,sr){
   const N=4096;
-  const frames=Math.min(400,Math.max(20,Math.floor((L.length-N)/(N*0.75))));
+  const frames=Math.min(900,Math.max(20,Math.floor((L.length-N)/(N*0.5))));
   const stride=Math.max(Math.floor(N*0.75),Math.floor((L.length-N)/frames));
   const chroma=new Float64Array(12);
   const win=new Float32Array(N);
@@ -275,26 +275,43 @@ function pearson(a,b){
 function detectKey(L,sr){
   const chroma=chromagram(L,sr);
   if(!chroma)return null;
+  // emphasize harmonically informative registers: weight chroma bins by presence stability
+  // (computed during chromagram via per-bin variance is complex; simpler: boost mid-range
+  // pitch classes by re-running chroma with a second pass emphasizing 130-1046Hz — skip,
+  // instead use triad-presence scoring which is the real discriminator)
+  const maxChroma=Math.max(...Array.from(chroma));
   const results=[];
   for(let tonic=0;tonic<12;tonic++){
     for(const [mode,profile] of [['major',KK_MAJOR],['minor',KK_MINOR]]){
       const prof=new Array(12);
       for(let i=0;i<12;i++)prof[i]=profile[((i-tonic)%12+12)%12];
-      results.push({tonic,mode,label:NOTE_NAMES[tonic]+' '+mode,r:pearson(chroma,prof)});
+      const r=pearson(chroma,prof);
+      const tonicPresence=chroma[tonic]/maxChroma;
+      const fifth=chroma[(tonic+7)%12]/maxChroma;
+      const third=chroma[(tonic+(mode==='major'?4:3))%12]/maxChroma;
+      // diatonic triad presence: tonic + third + fifth all sounding = strong key evidence
+      const triad=(tonicPresence+fifth+third)/3;
+      // full diatonic-set matching: reward the 7 scale degrees, punish the 5 non-scale notes
+      const scale=mode==='major'?[0,2,4,5,7,9,11]:[0,2,3,5,7,8,10];
+      let diaScore=0;
+      for(let pc=0;pc<12;pc++){
+        const c=chroma[pc]/maxChroma;
+        const inScale=scale.some(iv=>(tonic+iv)%12===pc);
+        diaScore+=inScale?c:-c*0.7;
+      }
+      const dia=diaScore/12+0.5; // normalize to ~0..1 range
+      // leading-tone evidence: a major key's LT (tonic-1) is chromatic to its relative minor
+      const ltMajor=chroma[(tonic+11)%12]/maxChroma;
+      const ltBonus=mode==='major'?(0.9+0.1*ltMajor):(0.95+0.05*ltMajor);
+      results.push({tonic,mode,label:NOTE_NAMES[tonic]+' '+mode,r,
+        rAdj:r*(0.45+0.55*tonicPresence)*(0.85+0.15*fifth)*(0.75+0.25*triad)*ltBonus*(0.6+0.4*dia)});
     }
-  }
-  // tonic-presence weighting: a key whose tonic pitch class is actually strong in the audio
-  // is more likely than its relative (which shares all notes but centers elsewhere)
-  const maxChroma=Math.max(...Array.from(chroma));
-  for(const x of results){
-    const tonicPresence=chroma[x.tonic]/maxChroma;
-    const fifth=chroma[(x.tonic+7)%12]/maxChroma;
-    x.rAdj=x.r*(0.45+0.55*tonicPresence)*(0.85+0.15*fifth);
   }
   results.sort((a,b)=>b.rAdj-a.rAdj);
   const best=results[0];
   // confidence: gap between winner and 7th (median-ish) candidate
-  const confidence=Math.max(0,Math.min(1,(best.rAdj-results[6].rAdj)*1.4));
+  const margin=best.rAdj-results[1].rAdj; // gap over runner-up
+  const confidence=Math.max(0.05,Math.min(1,0.35+margin*3));
   const alts=results.slice(1,4).map(x=>({label:x.label,confidence:Math.max(0,Math.min(1,x.rAdj))}));
   return {label:best.label,confidence,alts};
 }

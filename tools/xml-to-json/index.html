@@ -44,6 +44,10 @@ h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:
 </main>
 <script>
 const $=id=>document.getElementById(id);
+const inEl=document.getElementById('in');
+const out=document.getElementById('out');
+const msg=document.getElementById('msg');
+const pretty=document.getElementById('pretty');
 function tokenize(src){
   // returns events: {type:'start'|'end'|'text', name, attrs, selfClose}
   const ev=[];let i=0;
@@ -114,7 +118,7 @@ function xmlToJson(src){
 }
 function go(){
   try{
-    const obj=xmlToJson(in.value);
+    const obj=xmlToJson(inEl.value);
     out.value=JSON.stringify(obj,null,pretty.checked?2:0);
     msg.textContent='✓ Converted';msg.className='ok';
   }catch(e){msg.textContent='✗ '+e.message;msg.className='';}

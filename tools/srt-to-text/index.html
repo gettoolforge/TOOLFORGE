@@ -45,8 +45,13 @@ h2{margin-top:26px}ul{padding-left:22px}.muted{color:var(--mut)}code{background:
 </main>
 <script>
 const $=id=>document.getElementById(id);
+const inEl=document.getElementById('in');
+const out=document.getElementById('out');
+const msg=document.getElementById('msg');
+const dedupe=document.getElementById('dedupe');
+const para=document.getElementById('para');
 function go(){
-  const src=in.value;if(!src.trim()){msg.textContent='⚠ Paste SRT first';return;}
+  const src=inEl.value;if(!src.trim()){msg.textContent='⚠ Paste SRT first';return;}
   const seen=new Set();const paras=[];
   for(const block of src.replace(/\r/g,'').split(/\n\n+/)){
     const textLines=[];
